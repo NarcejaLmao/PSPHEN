@@ -1,1 +1,0 @@
-b'colordebugger.o .deps/colordebugger.Po: colordebugger.c colordebugger.h \\\n  /usr/local/pspdev/psp/sdk/include/psptypes.h \\\n  /home/narceja/PSPHEN/common/include/ansi_c_functions.h \\\n  /usr/local/pspdev/psp/sdk/include/pspgu.h \\\n  /usr/local/pspdev/psp/sdk/include/pspge.h \\\n  /home/narceja/PSPHEN/common/include/macros.h\n'

@@ -1,5 +1,0 @@
-# PSP HEN default settings: debug settings only
-always, qaflags, off
-always, fpscounter, off
-always, fpspos:topleft, on
-always, crashdump, off

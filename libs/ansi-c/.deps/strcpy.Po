@@ -1,1 +1,0 @@
-b'strcpy.o .deps/strcpy.Po: strcpy.c /home/narceja/PSPHEN/common/include/ansi_c_functions.h\n'
