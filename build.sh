@@ -66,7 +66,7 @@ function original {
 		clear
 		read -p "
 		This script will setup the correct SDK to build ARK, get sign_np
-		dependency and temporarly setup the enivorment to build ARK-4. 
+		dependency and temporarly setup the enivorment to build PSP HEN. 
 		
 		Press Enter to continue..."
 		
@@ -177,7 +177,7 @@ function withDialog {
 	dialog \
 		--title "Welcome to the ARK Compiler" \
 		--backtitle "Script created by Krazynez Version: $version" \
-		--msgbox "This script will setup the correct SDK to build ARK, get sign_np dependency and mkpsxiso and temporarly setup the enivorment to build ARK-4." 10 80 
+		--msgbox "This script will setup the correct SDK to build ARK, get sign_np dependency and mkpsxiso and temporarly setup the enivorment to build PSP HEN." 10 80 
 
 	dialog 	--title "Checking for existitng SDK"
 

@@ -131,7 +131,7 @@
     "ICON0 in Browser": "ファイルブラウザのICON0",
     "Show Game Path": "ゲームパスを表示",
 
-    "ARK Custom Firmware Settings": "ARK設定",
+    "PSP HEN Custom Firmware Settings": "ARK設定",
     "CFW Settings": "CFW設定",
     "Launcher/Recovery Settings": "ランチャー/リカバリの設定",
     "Menu Settings": "設定メニュー",
@@ -179,7 +179,7 @@
     "Debug I": "デバッグ I",
     "Debug II": "デバッグ Ⅱ",
     
-    "xmbmsg_system_update": "ARK-4アップデート",
+    "xmbmsg_system_update": "PSP HENアップデート",
     "xmbmsgtop_sysconf_configuration": "カスタムファームウェア設定",
     "xmbmsgtop_sysconf_plugins": "プラグインマネージャー",
     "xmbmsgtop_custom_launcher": "カスタムランチャー",

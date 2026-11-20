@@ -202,7 +202,7 @@ def main() -> None:
             sys.exit(1)
         print('Your only seeing this because you choose the wrong OS ;-)')
     print('Running...')
-    root.title('ARK-4 Upgrader')
+    root.title('PSP HEN Upgrader')
     root.geometry('800x150+50+50')
     check = psp()
     frame = ttk.Frame(root)

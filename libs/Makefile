@@ -25,6 +25,7 @@ PREBUILTDIRS = prebuilt libvlf
 
 all: subdirs
 	$(Q)cp $(addsuffix /*.a, $(SUBDIRS)) .
+	$(Q)rm -f ya2d/libya2d/*.o ya2d/libya2d/libya2d.a libya2d.a
 	$(Q)make CC="psp-gcc -std=c99 -I$(ARKROOT)/libs/libpspvram -I$(ARKROOT)/libs/libpng -I$(ARKROOT)/libs/libjpeg -I$(ARKROOT)/libs/libpspmath -I$(ARKROOT)/common/include -I$(PSPSDK)/include" -C ya2d/libya2d -f Makefile -f $(ARKROOT)/common/make/global.mak -f $(ARKROOT)/common/make/beauty_lib.mak
 	$(Q)cp ya2d/libya2d/libya2d.a .
 

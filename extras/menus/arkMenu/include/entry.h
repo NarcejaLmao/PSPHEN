@@ -100,8 +100,9 @@ class Entry{
 
         virtual SfoInfo getSfoInfo(){
             SfoInfo info;
-            strcpy(info.title, name.c_str());
-            strcpy(info.gameid, "HOMEBREW");
+            memset(&info, 0, sizeof(info));
+            strncpy(info.title, name.c_str(), sizeof(info.title)-1);
+            strncpy(info.gameid, "HOMEBREW", sizeof(info.gameid)-1);
             return info;
         };
         

@@ -1,4 +1,4 @@
-Silver Ring v2 Final ( ARK custom theme )
+Silver Ring v2 Final ( PSP HEN custom theme )
  by bloc-15
  
 #CONTENT#

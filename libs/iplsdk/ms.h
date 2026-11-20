@@ -5,5 +5,7 @@
 
 #define pspMsReadSector mspro_read_sector
 
+void pspMsInit(void);
+
 #endif
 

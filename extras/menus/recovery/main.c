@@ -193,7 +193,7 @@ static void draw(char** options, int size, int dir){
     printf("********************************************************************");
 
     pspDebugScreenSetXY(0, 2);
-    printf("* ARK-4 Recovery Menu *                                            *");
+    printf("* PSP HEN Recovery Menu *                                           *");
     pspDebugScreenSetXY(0, 3);
     printf("***********************                                            *");
     pspDebugScreenSetXY(0, 4);
@@ -242,7 +242,7 @@ int main(SceSize args, void *argp) {
     char *options[] = {
         "Exit",
         "Toggle USB",
-        "Custom Firmware Settings",
+        "PSP HEN Debug Settings",
         "Plugins Manager",
         "PRO Shell",
         "Run /PSP/GAME/RECOVERY/EBOOT.PBP"

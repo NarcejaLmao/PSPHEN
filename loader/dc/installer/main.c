@@ -390,7 +390,7 @@ void WriteSavedataFiles()
         } while (ret > 0);
     }
     else {
-        ErrorExit(1000, "Unable to copy ARK Savedata folder!.\n");
+        ErrorExit(1000, "Unable to copy PSP HEN Savedata folder!.\n");
     }
 }
 
@@ -1298,7 +1298,7 @@ int install_thread(SceSize args, void *argp)
 
 
         if(timeout!=0) {
-        	sprintf(text, "You chose %s to boot DC-ARK on boot.", buf);
+        	sprintf(text, "You chose %s to boot DC-PSP HEN on boot.", buf);
         	SetStatus(text);
         	sceKernelDelayThread(850000);
         	strcat(buf, " = \"ms0:/TM/DCARK/tm_mloader.bin\";\r\n");
@@ -1426,7 +1426,7 @@ int app_main()
         ErrorExit(1000, "There is not enough RAM memory.\n");
     }
 
-    int tt = vlfGuiAddText(0, 0, "DC-ARK");
+    int tt = vlfGuiAddText(0, 0, "DC-PSP HEN");
     int tp = vlfGuiAddPictureResource("update_plugin", "tex_update_icon", 0, 0);
     //int tp = vlfGuiAddPictureFile("m33.tga", 0, 0);
     vlfGuiChangeCharacterByButton('*', VLF_ENTER);

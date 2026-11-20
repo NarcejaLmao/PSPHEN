@@ -1,4 +1,4 @@
-# General Information about ARK
+# General Information about PSP HEN
 
 ## BOOT SEQUENCE
 
@@ -12,8 +12,8 @@
 2. Code execution in Kernel Mode.
 2.1. Inject rebootex to patch reboot buffer and trigger a reboot.
 2.2. Rebootex injects cfw modules in boot sequence.
-2.3. ARK's SystemControl (core CFW module) runs and sets up things.
-2.4. ARK's CompatLayer loads to add device-specific patches and functionality.
+2.3. PSP HEN's SystemControl (core CFW module) runs and sets up things.
+2.4. PSP HEN's CompatLayer loads to add device-specific patches and functionality.
 2.5. Other CFW modules will load.
 
 
@@ -21,7 +21,7 @@
 
 ## Core CFW Modules.
 1.1. SystemControl: main CFW module. Does most of the patching and sets things up for homebrew.
-1.2. CompatLayer: adds extra functionality and fixes to allow ARK to run correctly in the installed environment.
+1.2. CompatLayer: adds extra functionality and fixes to allow PSP HEN to run correctly in the installed environment.
 1.3. Inferno: driver for games in ISO, CSO or ZSO format.
 1.4. PopCorn: handles all the patching of POPS to allow custom PS1 games.
 1.5. Stargate: anti DRM module.

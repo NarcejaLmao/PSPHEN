@@ -28,6 +28,8 @@ extern "C" {
 #define ARK_MAJOR_VERSION 4
 #define ARK_MINOR_VERSION 20
 #define ARK_MICRO_VERSION 69
+#define PSPHEN_VERSION_STRING "PSP HEN 1.0 (based on ARK-4)"
+#define PSPHEN_FW_TAG "PSP HEN 1.0" // shown after the firmware number, e.g. "6.61 PSP HEN 1.0"
 #define ARK_REVISION      206
 
 // Pointers and sizes
@@ -62,8 +64,8 @@ extern "C" {
 #define ARK_XMENU "XBOOT.PBP" // PS1 launcher
 #define ARK_RECOVERY "RECOVERY.PBP" // recovery app
 #define RECOVERY_PRX "RECOVERY.PRX" // Classic Recovery
-#define FLASH0_ARK "FLASH0.ARK" // ARK flash0 package
-#define VSH_MENU "VSHMENU.PRX" // ARK VSH Menu for XMB
+#define FLASH0_ARK "FLASH0.ARK" // PSP HEN flash0 package
+#define VSH_MENU "VSHMENU.PRX" // PSP HEN VSH Menu for XMB
 #define XMBCTRL_PRX "XMBCTRL.PRX" // XMB Control
 #define IDSREG_PRX "IDSREG.PRX" // idsRegeneration
 #define USBDEV_PRX "USBDEV.PRX" // Custom USB Device
@@ -95,7 +97,7 @@ extern "C" {
 #define ARK_THEME_FILE "THEME.ARK" // theme file for arkMenu
 #define ARK_LANG_FILE "LANG.ARK" // language files
 #define ARK_BIN "ARK.BIN" // ARK-2 payload
-#define ARK4_BIN "ARK4.BIN" // ARK-4 payload
+#define ARK4_BIN "ARK4.BIN" // PSP HEN payload
 #define ARKX_BIN "ARKX.BIN" // ARK-X payload
 #define LIVE_EXPLOIT_ID "Live" // default loader name
 #define CIPL_EXPLOIT_ID "cIPL" // loader name for Custom IPL
@@ -103,8 +105,8 @@ extern "C" {
 #define DEFAULT_ARK_FOLDER "ARK_01234"
 #define SAVEDATA_MS0 "ms0:/PSP/SAVEDATA/"
 #define SAVEDATA_EF0 "ef0:/PSP/SAVEDATA/"
-#define DEFAULT_ARK_PATH SAVEDATA_MS0 DEFAULT_ARK_FOLDER "/" // default path for ARK files
-#define DEFAULT_ARK_PATH_GO SAVEDATA_EF0 DEFAULT_ARK_FOLDER "/" // default path for ARK files
+#define DEFAULT_ARK_PATH SAVEDATA_MS0 DEFAULT_ARK_FOLDER "/" // default path for PSP HEN files
+#define DEFAULT_ARK_PATH_GO SAVEDATA_EF0 DEFAULT_ARK_FOLDER "/" // default path for PSP HEN files
 #define ARK_DC_PATH "ms0:/TM/DCARK"
 #define TM_PATH_W L"\\TM\\DCARK\\"
 

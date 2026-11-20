@@ -1,9 +1,9 @@
 all:
 	$(Q)make $@ -C  eboot $(OPT)
 	$(Q)mkdir disc0/psp_game/sysdir | true
-	$(Q)cp eboot/ARK.prx disc0/psp_game/sysdir/EBOOT.BIN
-	$(Q)sign_np -elf eboot/ARK.elf EBOOT.BIN 0
-	$(Q)$(ARKROOT)/contrib/PC/prxencrypter/prxencrypter eboot/ARK.prx
+	$(Q)cp eboot/PSPHEN.prx disc0/psp_game/sysdir/EBOOT.BIN
+	$(Q)sign_np -elf eboot/PSPHEN.elf EBOOT.BIN 0
+	$(Q)$(ARKROOT)/contrib/PC/prxencrypter/prxencrypter eboot/PSPHEN.prx
 	$(Q)pack-pbp EBOOT.PBP eboot/PARAM.SFO eboot/ICON0.PNG NULL NULL NULL NULL data.psp NULL
 	$(Q)mkisofs -o ark_loader.iso disc0/
 

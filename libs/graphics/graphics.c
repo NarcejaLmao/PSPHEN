@@ -114,5 +114,5 @@ void PRTSTR11(const char* A, unsigned long B, unsigned long C, unsigned long D, 
   for (int i=0; i<sizeof(buff); i++) buff[i] = 0;
   mysprintf11(buff, A, (unsigned long)B, (unsigned long)C, (unsigned long)D,  (unsigned long)E, (unsigned long)F, (unsigned long)G, (unsigned long)H,  (unsigned long)I, (unsigned long) J, (unsigned long) K, (unsigned long) L);
   print_to_screen(buff);
-  if (screen_handler) screen_handler(g_vram_base);
+  if (screen_handler) screen_handler((u32)g_vram_base);
 }

@@ -669,7 +669,7 @@ Thanks Nall for quickly testing and help get this out :+1:
 - Added support for PS Vita firmwares 3.65 up to 3.74 included.
 - Some cleanup and fixes.
 
-Note: if you wish to use an older version of ARK-4 in 3.65+ you can simply use the K.BIN provided in this release's VitaBubble folder with the savedata from the older version.
+Note: if you wish to use an older version of PSP HEN in 3.65+ you can simply use the K.BIN provided in this release's VitaBubble folder with the savedata from the older version.
 
 ## Version 4.18.13 (2022-08-26)
 - https://github.com/PSP-Archive/ARK-4/releases/tag/r1813
@@ -1072,7 +1072,7 @@ Rest In Peace Dear Friend.
 ## Version 4.0.0:
 - Initial experimental release working on PSP 3K.
 
-# ARK-4
+# PSP HEN
 - Added compatibility with real PSP hardware.
 - Refactored Vita and VitaPOPS compatibility.
 - Improved arkMenu (custom launcher).

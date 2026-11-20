@@ -126,14 +126,14 @@ int main(int argc, char * argv[])
     pspDebugScreenInit();
 
     if (ark_config.magic != ARK_CONFIG_MAGIC){
-        pspDebugScreenPrintf("ERROR: not running ARK, exiting in 5 seconds...\n");
+        pspDebugScreenPrintf("ERROR: not running PSP HEN, exiting in 5 seconds...\n");
         sceKernelDelayThread(5000000);
         sceKernelExitGame();
     }
 
     checkArkConfig(&ark_config);
 
-    pspDebugScreenPrintf("ARK Updater Started\n");
+    pspDebugScreenPrintf("PSP HEN Updater Started\n");
 
     u32 my_ver = (ARK_MAJOR_VERSION << 24) | (ARK_MINOR_VERSION << 16) | (ARK_MICRO_VERSION << 8) | ARK_REVISION;
     u32 major = sctrlSEGetVersion();

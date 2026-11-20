@@ -103,7 +103,18 @@ Iso :: Iso(string path)
             this->read_iso_data = &Iso::read_raw_data;
             break;
     }
-    g_ciso_total_block = uncompressed_size/block_size;
+    g_ciso_total_block = (block_size > 0)? uncompressed_size/block_size : 0;
+
+    // The visible ISO entry should use the title embedded in PSP_GAME/PARAM.SFO,
+    // not the often-unhelpful filename (for example, ULUS12345.iso).
+    SfoInfo sfo = this->getSfoInfo();
+    sfo.title[sizeof(sfo.title)-1] = 0;
+    string title(sfo.title);
+    while (!title.empty() && (title[title.size()-1] == ' ' || title[title.size()-1] == '\t' || title[title.size()-1] == '\r' || title[title.size()-1] == '\n'))
+        title.erase(title.size()-1);
+    size_t first = title.find_first_not_of(" \t\r\n");
+    if (first != string::npos && title.size() > first)
+        this->name = title.substr(first);
 };
 
 Iso :: ~Iso()
@@ -344,9 +355,11 @@ SfoInfo Iso::getSfoInfo(){
     if (sfo_buffer){
         int title_size = sizeof(info.title);
         Entry::getSfoParam(sfo_buffer, size, "TITLE", (unsigned char*)(info.title), &title_size);
-        
-        int id_size = sizeof(info.gameid);
+        info.title[sizeof(info.title)-1] = 0;
+
+        int id_size = sizeof(info.gameid)-1;
         Entry::getSfoParam(sfo_buffer, size, "DISC_ID", (unsigned char*)(info.gameid), &id_size);
+        info.gameid[sizeof(info.gameid)-1] = 0;
 
         free(sfo_buffer);
     }
@@ -481,49 +494,110 @@ int Iso::read_compressed_data(u8 *addr, u32 size, u32 offset)
 }
 
 void* Iso::fastExtract(char* file, unsigned* size){
-    
-    void* buffer = NULL;
-    if (size != NULL)
-        *size = 0;
-    
+
+    if (size != NULL) *size = 0;
+    if (file == NULL || file[0] == 0) return NULL;
+
     g_cso_idx_start_block = -1;
-    
+
     if (file_cache.find(file) != file_cache.end()){
         if (size == NULL) return (void*)-1;
-        FileData file_data = file_cache[file];
-        void* buffer = malloc(file_data.size);
-        *size = file_data.size;
-        (this->*read_iso_data)((u8*)buffer, file_data.size, file_data.offset);
+        FileData cached = file_cache[file];
+        void* buffer = malloc(cached.size);
+        if (buffer == NULL) return NULL;
+        *size = cached.size;
+        if ((this->*read_iso_data)((u8*)buffer, cached.size, cached.offset) != (int)cached.size){
+            free(buffer);
+            *size = 0;
+            return NULL;
+        }
         return buffer;
     }
-    
-    (this->*read_iso_data)(temp_block, 12, 32926);
-    
-    unsigned dir_lba = ((unsigned*)temp_block)[0];
-    unsigned block_size = ((unsigned*)temp_block)[2];
-    unsigned dir_start = dir_lba*block_size + block_size;
-    
-    (this->*read_iso_data)(temp_block, sizeof(temp_block), dir_start);
-    
-    for (int i=0; i<sizeof(temp_block); i++){
-        if (strcasecmp((const char*)&temp_block[i], file) == 0){
-            if (size == NULL){
-                return (void*)-1;
+
+    // ISO9660 directory records store an extent LBA and byte length. The old
+    // implementation searched only the root directory, but PSP metadata and
+    // assets live below PSP_GAME (and often SYSDIR), so walk subdirectories.
+    struct Directory {
+        u32 lba;
+        u32 bytes;
+    } pending[64];
+    int pendingCount = 0;
+
+    u8 pvd[SECTOR_SIZE];
+    if ((this->*read_iso_data)(pvd, sizeof(pvd), 16 * SECTOR_SIZE) != (int)sizeof(pvd))
+        return NULL;
+    if (pvd[0] != 1 || memcmp(pvd + 1, "CD001", 5) != 0)
+        return NULL;
+
+    const u8* root = pvd + 156;
+    if (root[0] < 34) return NULL;
+    pending[pendingCount].lba = (u32)root[2] | ((u32)root[3] << 8) | ((u32)root[4] << 16) | ((u32)root[5] << 24);
+    pending[pendingCount].bytes = (u32)root[10] | ((u32)root[11] << 8) | ((u32)root[12] << 16) | ((u32)root[13] << 24);
+    pendingCount++;
+
+    while (pendingCount > 0){
+        Directory dir = pending[--pendingCount];
+        if (dir.bytes == 0 || dir.bytes > 16 * 1024 * 1024) continue;
+
+        u32 consumed = 0;
+        u8 sector[SECTOR_SIZE];
+        while (consumed < dir.bytes){
+            u32 chunk = dir.bytes - consumed;
+            if (chunk > SECTOR_SIZE) chunk = SECTOR_SIZE;
+            memset(sector, 0, sizeof(sector));
+            int got = (this->*read_iso_data)(sector, chunk, dir.lba * SECTOR_SIZE + consumed);
+            if (got <= 0) break;
+
+            u32 pos = 0;
+            while (pos < (u32)got){
+                u8 recordLen = sector[pos];
+                if (recordLen == 0) break; // padding to the next logical sector
+                if (recordLen < 34 || pos + recordLen > (u32)got) break;
+
+                const u8* record = sector + pos;
+                u32 extent = (u32)record[2] | ((u32)record[3] << 8) | ((u32)record[4] << 16) | ((u32)record[5] << 24);
+                u32 dataLen = (u32)record[10] | ((u32)record[11] << 8) | ((u32)record[12] << 16) | ((u32)record[13] << 24);
+                u8 nameLen = record[32];
+                const u8* entryName = record + 33;
+                bool isDirectory = (record[25] & 0x02) != 0;
+
+                // Reject malformed records before reading the identifier.
+                if (nameLen > 0 && 33 + nameLen <= recordLen &&
+                    !(nameLen == 1 && (entryName[0] == 0 || entryName[0] == 1))){
+                    char candidate[256];
+                    unsigned copyLen = nameLen;
+                    if (copyLen >= sizeof(candidate)) copyLen = sizeof(candidate)-1;
+                    memcpy(candidate, entryName, copyLen);
+                    candidate[copyLen] = 0;
+                    char* version = strchr(candidate, ';');
+                    if (version) *version = 0;
+
+                    if (!isDirectory && strcasecmp(candidate, file) == 0){
+                        if (size == NULL) return (void*)-1;
+                        if (dataLen == 0) return NULL;
+                        void* buffer = malloc(dataLen);
+                        if (buffer == NULL) return NULL;
+                        if ((this->*read_iso_data)((u8*)buffer, dataLen, extent * SECTOR_SIZE) != (int)dataLen){
+                            free(buffer);
+                            return NULL;
+                        }
+                        FileData found;
+                        found.offset = extent * SECTOR_SIZE;
+                        found.size = dataLen;
+                        file_cache[file] = found;
+                        *size = dataLen;
+                        return buffer;
+                    }
+
+                    if (isDirectory && pendingCount < (int)(sizeof(pending)/sizeof(pending[0]))){
+                        pending[pendingCount].lba = extent;
+                        pending[pendingCount].bytes = dataLen;
+                        pendingCount++;
+                    }
+                }
+                pos += recordLen;
             }
-            u8* sfo = (u8*)&temp_block[i-31];
-            FileData file_data;
-            file_data.offset = (sfo[0] + (sfo[1]<<8) + (sfo[2]<<16) + (sfo[3]<<24))*block_size;
-            file_data.size = (sfo[8] + (sfo[9]<<8) + (sfo[10]<<16) + (sfo[11]<<24));
-            
-            if (file_data.size == 0){
-                return NULL;
-            }
-            
-            void* buffer = malloc(file_data.size);
-            *size = file_data.size;
-            (this->*read_iso_data)((u8*)buffer, file_data.size, file_data.offset);
-            file_cache[file] = file_data;
-            return buffer;
+            consumed += chunk;
         }
     }
     return NULL;

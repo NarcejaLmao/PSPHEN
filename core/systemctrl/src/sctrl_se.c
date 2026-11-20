@@ -36,6 +36,8 @@
 #include "modulemanager.h"
 #include "loadercore.h"
 #include "imports.h"
+#include "fpscounter.h"
+#include "crashdump.h"
 
 SEConfig se_config = {
     .magic = ARK_CONFIG_MAGIC,
@@ -65,6 +67,9 @@ SEConfig se_config = {
     .noled = 0, // always false
     .wpa2 = 0, /* not used by default */
     .force_high_memory = 0,
+    .fps_counter = 0,
+    .fps_counter_pos = 0, // top left
+    .crash_dump = 0,
 };
 
 char *GetUmdFile(void) __attribute__((alias("sctrlSEGetUmdFile")));
@@ -116,6 +121,8 @@ SEConfig* sctrlSEGetConfigEx(SEConfig *config, int size)
 int sctrlSESetConfig(SEConfig *config)
 {
     memcpy(&se_config, config, sizeof(SEConfig));
+    fpsCounterApply(); // install overlay hook if it was just enabled
+    crashDumpApply(); // install exception handler if it was just enabled
     return 0;
 }
 
@@ -130,6 +137,8 @@ int sctrlSESetConfigEx(SEConfig *config, int size)
 {
     if (config && size == sizeof(SEConfig)){
         memcpy(&se_config, config, size);
+        fpsCounterApply(); // install overlay hook if it was just enabled
+        crashDumpApply(); // install exception handler if it was just enabled
         return 0;
     }
     return -1;

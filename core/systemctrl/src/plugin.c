@@ -546,6 +546,23 @@ static void settingsHandler(char* path, u8 enabled){
     else if (strcasecmp(path, "qaflags") == 0){ // QA Flags
         se_config.qaflags = enabled;
     }
+    else if (strcasecmp(path, "fpscounter") == 0){ // FPS Counter overlay
+        se_config.fps_counter = enabled;
+    }
+    else if (strncasecmp(path, "fpspos", 6) == 0){ // FPS Counter position
+        char* c = strchr(path, ':');
+        se_config.fps_counter_pos = FPS_POS_TOP_LEFT;
+        if (enabled && c){
+            if (strcasecmp(c+1, "topright") == 0) se_config.fps_counter_pos = FPS_POS_TOP_RIGHT;
+            else if (strcasecmp(c+1, "topmiddle") == 0) se_config.fps_counter_pos = FPS_POS_TOP_MIDDLE;
+            else if (strcasecmp(c+1, "bottomleft") == 0) se_config.fps_counter_pos = FPS_POS_BOTTOM_LEFT;
+            else if (strcasecmp(c+1, "bottomright") == 0) se_config.fps_counter_pos = FPS_POS_BOTTOM_RIGHT;
+            else if (strcasecmp(c+1, "bottommiddle") == 0) se_config.fps_counter_pos = FPS_POS_BOTTOM_MIDDLE;
+        }
+    }
+    else if (strcasecmp(path, "crashdump") == 0){ // Crash dump to Memory Stick
+        se_config.crash_dump = enabled;
+    }
 }
 
 static void settingsEnabler(char* path){

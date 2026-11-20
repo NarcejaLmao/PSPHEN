@@ -1,0 +1,1 @@
+b'memfind.o .deps/memfind.Po: memfind.c \\\n  /home/narceja/PSPHEN/common/include/ansi_c_functions.h\n'

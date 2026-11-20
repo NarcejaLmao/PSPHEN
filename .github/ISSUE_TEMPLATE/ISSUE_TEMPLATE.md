@@ -1,4 +1,4 @@
-## ARK-4 Bugs/Issues
+## PSP HEN Bugs/Issues
 
 #### PSP Model
 - [ ] PSP-1000 (Fat)

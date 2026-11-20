@@ -1,4 +1,4 @@
-TARGET = ARK
+TARGET = PSPHEN
 C_OBJS = main.o
 OBJS = $(C_OBJS)
 all: $(TARGET).prx
@@ -12,7 +12,7 @@ ASFLAGS = $(CFLAGS)
 LDFLAGS = -L sysmem -L $(ARKROOT)/libs
 BUILD_PRX = 1
 PSP_EBOOT_ICON = ICON0.PNG
-PSP_EBOOT_TITLE += ARK-4 Full Installer
+PSP_EBOOT_TITLE += PSP HEN Full Installer
 
 EXTRA_TARGETS = EBOOT.PBP
 

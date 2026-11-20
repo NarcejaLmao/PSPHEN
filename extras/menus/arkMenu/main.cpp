@@ -78,7 +78,7 @@ int main(int argc, char** argv){
     SettingsMenu* settings_menu = new SettingsMenu(&cfwstab, false, true, true);
     settings_menu->setCallbacks(saveSettings, loadSettings, cleanupSettings, resetCfwSettings);
     settings_menu->setName("CFW Settings");
-    settings_menu->setInfo("ARK Custom Firmware Settings");
+    settings_menu->setInfo("PSP HEN Custom Firmware Settings");
     settings_menu->readConf();
     entries[n_entries++] = settings_menu;
 

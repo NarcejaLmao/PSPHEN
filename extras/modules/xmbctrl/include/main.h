@@ -58,6 +58,9 @@ typedef struct
     int umdregion;
     int vshregion;
     int qaflags;
+    int fpscounter;
+    int fpscounterpos;
+    int crashdump;
 } CFWConfig;
 
 typedef struct

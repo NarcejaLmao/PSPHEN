@@ -131,7 +131,7 @@
     "ICON0 in Browser": "文件瀏覽器中的 ICON0",
     "Show Game Path": "顯示遊戲路徑",
 
-    "ARK Custom Firmware Settings": "ARK設定",
+    "PSP HEN Custom Firmware Settings": "ARK設定",
     "CFW Settings": "CFW設定",
     "Launcher/Recovery Settings": "啟動器/恢復 設定",
     "Menu Settings": "選單設定",
@@ -177,11 +177,11 @@
     "Russia": "俄羅斯",
     "China": "中國",
 
-    "xmbmsg_system_update": "ARK-4 更新程序",
+    "xmbmsg_system_update": "PSP HEN 更新程序",
     "xmbmsgtop_sysconf_configuration": "自訂韌體設定",
     "xmbmsgtop_sysconf_plugins": "外掛程式管理器",
     "xmbmsgtop_custom_launcher": "自訂啟動器",
     "xmbmsgtop_custom_app": "自訂應用程式",
-    "xmbmsgtop_150_reboot": "重啟進入 1.50 ARK"
+    "xmbmsgtop_150_reboot": "重啟進入 1.50 PSP HEN"
     
 }

@@ -249,7 +249,7 @@ void Menu::run(){
     u32 micro = sctrlHENGetMinorVersion();
 
     stringstream version;
-    version << "ARK " << major << "." << minor << "." << micro;
+    version << "PSP HEN " << major << "." << minor << "." << micro;
     if (major==4) version << " r" << ARK_REVISION;
     version << " " << ark_config->exploit_id;
     #ifdef DEBUG

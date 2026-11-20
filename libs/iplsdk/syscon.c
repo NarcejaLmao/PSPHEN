@@ -1,3 +1,4 @@
+#include <string.h>
 #include "syscon.h"
 #include "comms.h"
 #include "gpio.h"
@@ -154,7 +155,7 @@ int syscon_read_scratchpad(unsigned int src, unsigned int *dest)
 {
     unsigned char data = (unsigned char)(src << 2) | (unsigned char)(sizeof(unsigned int) >> 1);
 
-    return syscon_issue_command_read_write(SYSCON_READ_SCRATCHPAD, &data, sizeof(data), dest);
+    return syscon_issue_command_read_write(SYSCON_READ_SCRATCHPAD, &data, sizeof(data), (unsigned char *)dest);
 }
 
 int syscon_write_scratchpad(unsigned int dest, unsigned int *src)

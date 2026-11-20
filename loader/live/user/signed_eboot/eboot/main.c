@@ -19,7 +19,7 @@
 #include "functions.h"
 #include "graphics.h"
 
-PSP_MODULE_INFO("ARK Loader", PSP_MODULE_USER, 1, 0);
+PSP_MODULE_INFO("PSP HEN Loader", PSP_MODULE_USER, 1, 0);
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_USER | PSP_THREAD_ATTR_VFPU);
 
 #define ARK_LOADADDR 0x08D30000
@@ -160,7 +160,7 @@ int main(int argc, char** argv){
     sceIoClose(fd);
     sceKernelDcacheWritebackAll();
 
-    PRTSTR("Executing ARK Stage 2");
+    PRTSTR("Executing PSP HEN Stage 2");
     // execute main function
     void (* hEntryPoint)(ARKConfig*, UserFunctions*, char*) = (void*)ARK_LOADADDR;
     hEntryPoint(&config, &funcs, kxploit);

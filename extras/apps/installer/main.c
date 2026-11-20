@@ -77,7 +77,7 @@ static const int N_FLASH_FILES = (sizeof(flash_files)/sizeof(flash_files[0]));
 void install(char *argv[]) {
     pspDebugScreenClear();
 
-    printf("ARK Full Installer Started\n");
+    printf("PSP HEN Full Installer Started\n");
 
 
     u32 my_ver = (ARK_MAJOR_VERSION << 16) | (ARK_MINOR_VERSION << 8) | ARK_MICRO_VERSION;
@@ -258,12 +258,12 @@ int main(int argc, char * argv[])
     pspDebugScreenInit();
 
     if (ark_config.magic != ARK_CONFIG_MAGIC){
-        printf("ERROR: not running ARK\n");
+        printf("ERROR: not running PSP HEN\n");
         sceKernelDelayThread(100000);
         sceKernelExitGame();
     }
 
-    printf("\n\n\tARK-4 Full Installer\n");
+    printf("\n\n\tPSP HEN Full Installer\n");
 
     int cursor = 0;
     while(1) {

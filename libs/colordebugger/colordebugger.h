@@ -6,6 +6,8 @@
 
 extern u32* g_vram_base;
 
+void initColorDebug(void);
+
 // fill vram with the given color
 void colorDebug(u32 color);
 

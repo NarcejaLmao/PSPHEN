@@ -57,9 +57,9 @@ int main(int argc, const char *argv[]) {
     SceCtrlData pad;
     int selection = 0;
     const char *options[] = {
-        "Install ARK-4, ARK-X and All Plugins",
-        "Install Only ARK-4 (No Plugins)",
-        "Install ARK-4 and Analog Plugin",
+        "Install PSP HEN, ARK-X and All Plugins",
+        "Install Only PSP HEN (No Plugins)",
+        "Install PSP HEN and Analog Plugin",
         "Install Only Analog Plugin",
         "Install ARK-X and PS1 Plugin",
         "Exit"
@@ -105,11 +105,11 @@ int main(int argc, const char *argv[]) {
 
     switch (selection) {
         case 0:
-            displayMsg("Installing ARK-4 and ARK-X", "Installing full package...");
+            displayMsg("Installing PSP HEN and ARK-X", "Installing full package...");
             doInstall();
 
             {
-                const char *launch_options[] = { "Launch ARK-4", "Launch ARK-X" };
+                const char *launch_options[] = { "Launch PSP HEN", "Launch ARK-X" };
                 int launch_sel = 0;
                 int launch_num = sizeof(launch_options) / sizeof(launch_options[0]);
 
@@ -151,7 +151,7 @@ int main(int argc, const char *argv[]) {
                 }
 
                 if (launch_sel == 0) {
-                    sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=NPUZ01234"); // ARK-4
+                    sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=NPUZ01234"); // PSP HEN
                     sceKernelDelayThread(1000 * 1000);
                     sceKernelExitProcess(0);
                 } else {
@@ -163,12 +163,12 @@ int main(int argc, const char *argv[]) {
             return 0;
 
         case 1:
-            displayMsg("Installing ARK-4", "Installing ARK-4 only (no plugins)...");
+            displayMsg("Installing PSP HEN", "Installing PSP HEN only (no plugins)...");
             installARK4Only();
             break;
 
         case 2:
-            displayMsg("Installing ARK-4 and Analog Plugin", "Installing ARK-4 and analog plugin...");
+            displayMsg("Installing PSP HEN and Analog Plugin", "Installing PSP HEN and analog plugin...");
             installARK4Only();
             installAnalogPlugin();
             taiReloadConfig();
@@ -193,7 +193,7 @@ int main(int argc, const char *argv[]) {
     }
 
     if (selection == 3) {
-        // For "Install Only Analog Plugin", don't launch since ARK-4 may not be installed
+        // For "Install Only Analog Plugin", don't launch since PSP HEN may not be installed
         vita2d_start_drawing();
         vita2d_clear_screen();
         vita2d_pgf_draw_textf(uiGetFont(), 20, 100, RGBA8(255, 255, 255, 255), 1.0f, "Installation complete!");
@@ -207,10 +207,10 @@ int main(int argc, const char *argv[]) {
         const char *launch_opts[2];
         int num_launch = 0;
         if (selection == 1) {
-            launch_opts[0] = "Launch ARK-4";
+            launch_opts[0] = "Launch PSP HEN";
             num_launch = 1;
         } else if (selection == 2) {
-            launch_opts[0] = "Launch ARK-4";
+            launch_opts[0] = "Launch PSP HEN";
             num_launch = 1;
         } else if (selection == 4) {
             launch_opts[0] = "Launch ARK-X";
@@ -253,13 +253,13 @@ int main(int argc, const char *argv[]) {
         }
         if (num_launch == 1) {
             if (selection == 1 || selection == 2) {
-                sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=NPUZ01234"); // ARK-4
+                sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=NPUZ01234"); // PSP HEN
             } else { // selection == 4
                 sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=SCPS10084"); // ARK-X
             }
         } else { // num_launch == 2
             if (launch_sel == 0) {
-                sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=NPUZ01234"); // ARK-4
+                sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=NPUZ01234"); // PSP HEN
             } else {
                 sceAppMgrLaunchAppByUri(0, "psgm:play?titleid=SCPS10084"); // ARK-X
             }

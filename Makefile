@@ -84,18 +84,18 @@ all: subdirs cipl msipl kxploits finalspeed mkdir-dist encrypt-prx copy-dcark pa
 
 #	Common installation
 copy-bin:
-	$(Q)cp -r contrib/PSP/SAVEDATA/ARK_01234/ dist/ # ARK Savedata installation
-	$(Q)cp -r contrib/PSP/GAME/ARK_DC/ dist/PSP/ # ARK DC installer
-	$(Q)cp loader/dc/installer/EBOOT.PBP dist/PSP/ARK_DC/ # ARK DC installer
+	$(Q)cp -r contrib/PSP/SAVEDATA/ARK_01234/ dist/ # PSP HEN Savedata installation
+	$(Q)cp -r contrib/PSP/GAME/ARK_DC/ dist/PSP/ # PSP HEN DC installer
+	$(Q)cp loader/dc/installer/EBOOT.PBP dist/PSP/ARK_DC/ # PSP HEN DC installer
 	$(Q)cp loader/vpk/bin/psp/EBOOT.PBP dist/PSVita/PSPCFW/NPUZ01234/
 	$(Q)cp loader/vpk/bin/psp/PBOOT.PBP dist/PSVita/PSPCFW/NPUZ01234/
 	$(Q)cp loader/vpk/bin/psp/arkrightanalog.suprx dist/PSVita/PSPCFW/
 	$(Q)cp loader/perma/cipl/installer/EBOOT.PBP dist/PSP/ARK_cIPL/EBOOT.PBP
 	$(Q)cp loader/live/user/linkless_payload/H.BIN dist/ARK_01234/H.BIN # game exploit loader
-	$(Q)cp loader/live/user/signed_eboot/EBOOT.PBP dist/ARK_Loader/EBOOT.PBP # Signed EBOOT
-	$(Q)cp loader/live/user/psxloader/EBOOT.PBP dist/PSVita/PS1CFW/SCPS10084/
+	$(Q)if [ -f loader/live/user/signed_eboot/EBOOT.PBP ]; then cp loader/live/user/signed_eboot/EBOOT.PBP dist/ARK_Loader/EBOOT.PBP; else echo "WARNING: signed_eboot/EBOOT.PBP missing (sign_np not installed?) - skipping ARK_Loader/EBOOT.PBP"; fi # Signed EBOOT
+	$(Q)if [ -f loader/live/user/psxloader/EBOOT.PBP ]; then cp loader/live/user/psxloader/EBOOT.PBP dist/PSVita/PS1CFW/SCPS10084/; else echo "WARNING: psxloader/EBOOT.PBP missing (mkpsxiso not installed?) - skipping PS1CFW EBOOT.PBP"; fi
 	$(Q)cp loader/live/kernel/chain_loader/ARK.BIN dist/ARK_01234/ARK.BIN # ARK-2 chainloader
-	$(Q)cp loader/live/kernel/kernel_loader/ARK4.BIN dist/ARK_01234/ARK4.BIN # ARK-4 loader
+	$(Q)cp loader/live/kernel/kernel_loader/ARK4.BIN dist/ARK_01234/ARK4.BIN # PSP HEN loader
 	$(Q)cp loader/live/kernel/psxloader/ARKX.BIN dist/ARK_01234/ARKX.BIN # ARK-X loader
 	$(Q)cp loader/live/kernel/psxloader/ps1cfw_enabler/ps1cfw_enabler.suprx dist/PSVita/PS1CFW/
 	$(Q)cp extras/modules/ef2mapper/ef2uma.suprx dist/PSVita/
@@ -131,8 +131,8 @@ copy-bin:
 	$(Q)cp contrib/PSP/pops_01g.prx dist/PSP/ARK_Full_Installer/kd/
 	$(Q)cp contrib/PSP/popsman.prx dist/PSP/ARK_Full_Installer/kd/
 	$(Q)cp contrib/PSP/libpspvmc.prx dist/PSP/ARK_Full_Installer/vsh/module/
-	$(Q)cp extras/apps/uninstaller/EBOOT.PBP dist/PSP/ARK_Uninstaller # ARK-4 Uninstaller
-	$(Q)cp extras/150kernel/installer/EBOOT.PBP dist/PSP/ARK_150Addon # ARK-4 150 Kernel Addon
+	$(Q)cp extras/apps/uninstaller/EBOOT.PBP dist/PSP/ARK_Uninstaller # PSP HEN Uninstaller
+	$(Q)cp extras/150kernel/installer/EBOOT.PBP dist/PSP/ARK_150Addon # PSP HEN 150 Kernel Addon
 	$(Q)cp contrib/PSP/GAME/ARK_DC/libpsardumper.prx dist/PSP/ARK_150Addon
 	$(Q)cp contrib/PSP/GAME/ARK_DC/pspdecrypt.prx dist/PSP/ARK_150Addon
 	$(Q)cp contrib/UPDATER.TXT dist/ARK_01234/

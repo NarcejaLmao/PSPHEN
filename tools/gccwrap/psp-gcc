@@ -1,0 +1,8 @@
+#!/bin/sh
+# PSP HEN: wrapper that lets old ARK-4 C code build with GCC 14+.
+# Downgrades GCC 14's new hard errors back to warnings for every compile.
+D="$(cd "$(dirname "$0")" && pwd)"
+CLEAN_PATH="$(printf '%s' "$PATH" | tr ':' '\n' | grep -vxF "$D" | paste -sd: -)"
+REAL="$(PATH="$CLEAN_PATH" command -v psp-gcc)"
+if [ -z "$REAL" ]; then echo "psp-gcc wrapper: real psp-gcc not found in PATH" >&2; exit 127; fi
+exec "$REAL" "$@" -Wno-error=implicit-function-declaration -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-error=implicit-int

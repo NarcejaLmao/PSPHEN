@@ -1,4 +1,4 @@
-# DC-ARK Maker
+# DC-PSP HEN Maker
 
 ##### Setup
 
@@ -26,9 +26,9 @@
 
 #### Credits:
 
-* MeetPatty (DC-ARK)
+* MeetPatty (DC-PSP HEN)
 
-* Acid_Snake (for the idea/ARK-4 itself/module version of msipl_installer)
+* Acid_Snake (for the idea/PSP HEN itself/module version of msipl_installer)
 
 * John Kelley  (pspdecrypt)
 

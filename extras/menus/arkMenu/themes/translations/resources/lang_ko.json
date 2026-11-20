@@ -135,7 +135,7 @@
     "ICON0 in Browser": "파일 브라우저의 ICON0",
     "Show Game Path": "게임 경로 표시",
 
-    "ARK Custom Firmware Settings": "ARK 커스텀 펌웨어 설정",
+    "PSP HEN Custom Firmware Settings": "PSP HEN 커스텀 펌웨어 설정",
     "CFW Settings": "커스텀 펌웨어 설정",
     "Launcher/Recovery Settings": "런처/리커버리 설정",
     "Menu Settings": "메뉴 설정",
@@ -183,7 +183,7 @@
     "Debug I": "디버깅 I",
     "Debug II": "디버깅 2",
 
-    "xmbmsg_system_update": "ARK-4 업데이터",
+    "xmbmsg_system_update": "PSP HEN 업데이터",
     "xmbmsgtop_sysconf_configuration": "사용자 정의 펌웨어 설정",
     "xmbmsgtop_sysconf_plugins": "플러그인 관리자",
     "xmbmsgtop_custom_launcher": "사용자 정의 런처",

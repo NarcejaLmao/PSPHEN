@@ -15,7 +15,7 @@
 
 #include <ark.h>
 
-PSP_MODULE_INFO("ARK VitaPOPS Loader", 0, 1, 0);
+PSP_MODULE_INFO("PSP HEN VitaPOPS Loader", 0, 1, 0);
 
 int psxloader_thread(int argc, void* argv){
 

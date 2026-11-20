@@ -477,7 +477,7 @@ int main()
     SceModule2 infinity_mod;
     SceIoStat dc_stat;
     if (kuKernelFindModuleByName("InfinityControl", &infinity_mod) == 0 && sceIoGetstat("ms0:/TM/DCARK/msipl.raw", &dc_stat)<0){
-        ErrorExit(5000, "ERROR: installing cIPL over Infinity is risky, make sure you install DC-ARK first before doing this!");
+        ErrorExit(5000, "ERROR: installing cIPL over Infinity is risky, make sure you install DC-PSP HEN first before doing this!");
     }
 
     kpspident = pspSdkLoadStartModule("kpspident.prx", PSP_MEMORY_PARTITION_KERNEL);

@@ -31,6 +31,9 @@ OBJS = \
 	src/leda.o \
 	src/psnfix.o \
 	src/cpuclock.o   \
+	src/fpscounter.o \
+	src/crashdump.o \
+	src/crashdump_asm.o \
 	src/msstor_cache.o \
 	src/threadman.o \
 	src/utility.o \

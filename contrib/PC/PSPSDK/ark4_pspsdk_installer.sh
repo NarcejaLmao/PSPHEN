@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# PSPSDK installer script by Yoti for ARK-4 project
+# PSPSDK installer script by Yoti for PSP HEN project
 # 2022-07-01: initial release
 # 2022-07-03: python2 + chown
 # 2022-09-05: use local file

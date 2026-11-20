@@ -148,6 +148,18 @@ enum umdregion
     UMD_REGION_JAPAN,
 };
 
+// FPS counter overlay positions (debug setting "FPS Counter Position")
+enum FpsCounterPosition
+{
+    FPS_POS_TOP_LEFT = 0,
+    FPS_POS_TOP_RIGHT,
+    FPS_POS_TOP_MIDDLE,
+    FPS_POS_BOTTOM_LEFT,
+    FPS_POS_BOTTOM_RIGHT,
+    FPS_POS_BOTTOM_MIDDLE,
+    FPS_POS_COUNT,
+};
+
 // keep ARK's SEConfig binary compatible with PRO's
 typedef struct _SEConfig
 {
@@ -180,6 +192,9 @@ typedef struct _SEConfig
     u8 wpa2; // patch to use wpa2
     u8 force_high_memory;
     u8 custom_update;
+    u8 fps_counter; // show FPS counter overlay (debug)
+    u8 fps_counter_pos; // where the FPS counter is drawn (enum FpsCounterPosition)
+    u8 crash_dump; // write a crash report to the Memory Stick on CPU exceptions (debug)
 } SEConfig;
 
 /**

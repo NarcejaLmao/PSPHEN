@@ -216,18 +216,38 @@ bool Entry::cmpEntriesForSort (Entry* i, Entry* j) {
 }
 
 bool Entry::getSfoParam(unsigned char* sfo_buffer, int buf_size, char* param_name, unsigned char* var, int* var_size){
-    SFOHeader *header = (SFOHeader *)sfo_buffer;
-    SFODir *entries = (SFODir *)(sfo_buffer + sizeof(SFOHeader));
-    bool res = false;
-    int i;
-    for (i = 0; i < header->nitems; i++) {
-        if (strcmp((char*)sfo_buffer + header->fields_table_offs + entries[i].field_offs, param_name) == 0) {
-            memcpy(var, sfo_buffer + header->values_table_offs + entries[i].val_offs, *var_size);
-            res = true;
-            break;
+    if (sfo_buffer == NULL || param_name == NULL || var == NULL || var_size == NULL || *var_size <= 0 || buf_size < (int)sizeof(SFOHeader))
+        return false;
+
+    SFOHeader* header = (SFOHeader*)sfo_buffer;
+    if (header->nitems <= 0 || header->nitems > 256 ||
+        header->fields_table_offs >= (u32)buf_size || header->values_table_offs >= (u32)buf_size ||
+        sizeof(SFOHeader) + (u32)header->nitems * sizeof(SFODir) > (u32)buf_size)
+        return false;
+
+    SFODir* entries = (SFODir*)(sfo_buffer + sizeof(SFOHeader));
+    for (int i = 0; i < header->nitems; i++) {
+        u32 keyOffset = header->fields_table_offs + entries[i].field_offs;
+        u32 valueOffset = header->values_table_offs + entries[i].val_offs;
+        u32 valueSize = entries[i].unk2;
+        if (keyOffset >= (u32)buf_size || keyOffset >= header->values_table_offs ||
+            valueOffset > (u32)buf_size || valueSize > (u32)buf_size - valueOffset)
+            continue;
+
+        const char* key = (const char*)sfo_buffer + keyOffset;
+        u32 keyMax = header->values_table_offs - keyOffset;
+        if (keyMax == 0 || memchr(key, 0, keyMax) == NULL)
+            continue;
+
+        if (strcmp(key, param_name) == 0) {
+            u32 copySize = valueSize;
+            if (copySize > (u32)*var_size) copySize = (u32)*var_size;
+            memcpy(var, sfo_buffer + valueOffset, copySize);
+            *var_size = (int)copySize;
+            return true;
         }
     }
-    return res;
+    return false;
 }
 
 void Entry::animAppear(){

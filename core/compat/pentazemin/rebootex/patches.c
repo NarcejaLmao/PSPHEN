@@ -42,7 +42,7 @@ int pspemuLfatOpenExtra(BootFile* file){
             relocateFlashFile(file);
         }
     }
-    else if (strncmp(p, "/kd/ark_", 8) == 0){ // ARK module
+    else if (strncmp(p, "/kd/ark_", 8) == 0){ // PSP HEN module
         ret = findArkFlashFile(file, p);
         if (ret == 0){
             relocateFlashFile(file);

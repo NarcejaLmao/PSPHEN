@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 
 char* strstr(const char* source, const char* search){
     int len = strlen(search)-1;

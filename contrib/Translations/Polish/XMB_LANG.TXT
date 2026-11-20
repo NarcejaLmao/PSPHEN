@@ -1,4 +1,4 @@
-ARK-4 Updater
+PSP HEN Updater
 Ustawienia niestandardowego oprogramowania układowego
 Menedżer wtyczek
 Niestandardowy program uruchamiający
@@ -22,4 +22,4 @@ Wyłącz dysk UMD
 Wyłącz drążek analogowy
 Flagi QA
 Niestandardowa aplikacja
-Ponowne uruchomienie w 1.50 ARK
+Ponowne uruchomienie w 1.50 PSP HEN

@@ -34,6 +34,8 @@
 #include "rebootex.h"
 #include "rebootconfig.h"
 #include "sysmem.h"
+#include "fpscounter.h"
+#include "crashdump.h"
 
 extern u32 sctrlHENFakeDevkitVersion();
 extern int is_plugins_loading;
@@ -217,6 +219,16 @@ static void ARKSyspatchOnModuleStart(SceModule2 * mod)
             // patch QA flags settings
             if (se_config.qaflags){
                 patch_qaflags();
+            }
+
+            // FPS counter overlay (debug setting)
+            if (se_config.fps_counter){
+                fpsCounterApply();
+            }
+
+            // crash dump to Memory Stick (debug setting)
+            if (se_config.crash_dump){
+                crashDumpApply();
             }
 
             // handle UMD seek and UMD speed settings

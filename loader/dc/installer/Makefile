@@ -43,7 +43,7 @@ LIBS = -lpspsystemctrl_user -lpspkubridge -lpsppower -lvlfgui -lvlfgu -lvlfutils
 PSP_FW_VERSION = 660
 
 EXTRA_TARGETS = EBOOT.PBP
-PSP_EBOOT_TITLE = ARK DC Installer
+PSP_EBOOT_TITLE = PSP HEN DC Installer
 PSP_EBOOT_ICON = despertar.png
 PSP_EBOOT_PIC0 = PIC0.PNG
 

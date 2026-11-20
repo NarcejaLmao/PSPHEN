@@ -38,7 +38,7 @@
 #include "settings.h"
 #include "plugins.h"
 
-PSP_MODULE_INFO("XmbControl", 0x0007, 1, 5);
+PSP_MODULE_INFO("PSPHENXmbControl", 0x0007, 1, 5);
 
 ARKConfig _arkconf;
 ARKConfig* ark_config = &_arkconf;
@@ -47,27 +47,8 @@ extern List plugins;
 static char custom_app_path[] = "ms0:/PSP/APP/CUSTOM/EBOOT.PBP";
 
 enum{
-    USB_CHARGE,
-    CPU_CLOCK_GAME,
-    CPU_CLOCK_VSH,
-    WPA2_SUPPORT,
-    AUTOBOOT_LAUNCHER,
-    USE_EXTRA_MEM,
-    MEM_STICK_SPEEDUP,
-    INFERNO_CACHE,
-    DISABLE_GO_PAUSE,
-    OLD_GO_PLUGINS,
-    NO_HIB_DELETE,
-    SKIP_LOGOS,
-    HIDE_PICS,
-    HIDE_MAC,
-    HIDE_DLC,
-    DISABLE_LED,
-    DISABLE_UMD,
-    DISABLE_ANALOG,
-    UMD_REGION,
-    VSH_REGION,
     QA_FLAGS,
+    VSH_REGION,
 };
 
 typedef struct
@@ -79,27 +60,11 @@ typedef struct
 
 GetItem GetItemes[] =
 {
-    { 2, 0, "USB Charge" },
-    { 3, 0, "CPU Clock in Game" },
-    { 4, 0, "CPU Clock in XMB" },
-    { 5, 0, "WPA2 Support" },
-    { 6, 0, "Autoboot Launcher" },
-    { 7, 0, "Use Extra Memory" },
-    { 8, 0, "Memory Stick Speedup" },
-    { 9, 0, "Inferno Cache" },
-    { 10, 0, "Disable PSP Go Pause" },
-    { 11, 0, "Old Plugins on ef0" },
-    { 12, 0, "Prevent hibernation deletion on PSP Go" },
-    { 13, 0, "Skip Sony logos" },
-    { 14, 0, "Hide PIC0 and PIC1" },
-    { 15, 0, "Hide MAC Address" },
-    { 16, 0, "Hide DLC" },
-    { 17, 0, "Turn off LEDs" },
-    { 18, 0, "Disable UMD Drive" },
-    { 19, 0, "Disable Analog Stick" },
-    { 20, 0, "UMD Region" },
-    { 21, 0, "VSH Region" },
-    { 22, 0, "QA Flags" },
+    { 2, 0, "QA Flags" },
+    { 3, 0, "VSH Region" },
+    { 2, 0, "FPS Counter" },
+    { 4, 0, "FPS Counter Position" },
+    { 2, 0, "Crash Dump" },
 };
 
 #define PLUGINS_CONTEXT 1
@@ -160,33 +125,20 @@ char* ark_vshregion_options[] = {
     "Taiwan", "Russia", "China", "Debug I", "Debug II"
 };
 
+char* ark_fpspos_options[] = {
+    "Top Left", "Top Right", "Top Middle",
+    "Bottom Left", "Bottom Right", "Bottom Middle"
+};
+
 struct {
     int n;
     char** c;
 } item_opts[] = {
     {0, NULL}, // None
-    {3, ark_plugins_options}, // Plugins
-    {2, ark_settings_boolean}, // USB Charge
-    {4, ark_clock_settings}, // Clock Game
-    {4, ark_clock_settings}, // Clock VSH
-    {2, ark_settings_boolean}, // WPA2 ( Thanks again @Moment )
-    {2, ark_settings_boolean}, // Autoboot Launcher
-    {2, ark_settings_boolean2}, // Extra RAM
-    {2, ark_settings_boolean}, // MS Speedup
-    {3, ark_settings_infernocache}, // Inferno Cache
-    {2, ark_settings_boolean2}, // Disable Go Pause
-    {2, ark_settings_boolean}, // Old Plugins on ef0
-    {2, ark_settings_boolean}, // Prevent hib delete
-    {4, ark_skiplogos_settings}, // Skip Sony logos
-    {4, ark_hidepics_settings}, // Hide PIC0 and PIC1
-    {2, ark_settings_boolean}, // Hide MAC
-    {2, ark_settings_boolean}, // Hide DLC
-    {2, ark_settings_boolean}, // Turn off LEDs
-    {2, ark_settings_boolean}, // Disable UMD Drive
-    {2, ark_settings_boolean}, // Disable Analog Stick 
-    {NELEMS(ark_umdregion_options), ark_umdregion_options}, // UMD Region
-    {NELEMS(ark_vshregion_options), ark_vshregion_options}, // VSH Region
+    {3, ark_plugins_options}, // Plugins (index 1 is PLUGINS_CONTEXT, kept for the plugin code)
     {2, ark_settings_boolean}, // QA Flags
+    {NELEMS(ark_vshregion_options), ark_vshregion_options}, // VSH Region
+    {NELEMS(ark_fpspos_options), ark_fpspos_options}, // FPS Counter Position
 };
 
 #define N_ITEMS (sizeof(GetItemes) / sizeof(GetItem))
@@ -553,81 +505,42 @@ void* addCustomVshItem(int id, char* text, int action_arg, SceVshItem* orig){
     return item;
 }
 
+// PSP HEN: the Debug Settings item is queued when the Settings column is seen and
+// inserted once that column is finished, so it ends up at the bottom of the list.
+static int debug_item_pending = 0;
+static void *debug_item_a0 = NULL;
+static int debug_item_topitem = -1;
+
 int AddVshItemPatched(void *a0, int topitem, SceVshItem *item)
 {
 
     static int items_added = 0;
 
+    // A different column has started: the Settings column is complete, so add our
+    // item now (after every original Settings item).
+    if (debug_item_pending && topitem != debug_item_topitem){
+        debug_item_pending = 0;
+        AddVshItem(debug_item_a0, debug_item_topitem, new_item);
+    }
+
     if (sce_paf_private_strcmp(item->text, "msgtop_sysconf_console")==0){
         sysconf_action = item->action;
         LoadTextLanguage(-1);
+
+        // PSP HEN: "msgtop_sysconf_console" is a Settings-column item, so use it as the
+        // template for our entry and remember which column it belongs to.
+        if (!items_added) // prevent adding more than once
+        {
+            items_added = 1;
+            startup = 0;
+
+            new_item = addCustomVshItem(81, "xmbmsgtop_sysconf_configuration", sysconf_tnconfig_action_arg, item);
+            debug_item_a0 = a0;
+            debug_item_topitem = topitem;
+            debug_item_pending = 1;
+        }
     }
 
-    if ( !items_added && // prevent adding more than once
-        // Game Items
-        (sce_paf_private_strcmp(item->text, "msgtop_game_gamedl")==0 ||
-        sce_paf_private_strcmp(item->text, "msgtop_game_savedata")==0 ||
-        // Extras Items
-        sce_paf_private_strcmp(item->text, "msg_digitalcomics")==0 ||
-        sce_paf_private_strcmp(item->text, "msg_bookreader")==0 ||
-        sce_paf_private_strcmp(item->text, "msg_1seg")==0 ||
-        sce_paf_private_strcmp(item->text, "msg_xradar_portable")==0 ||
-        sce_paf_private_strcmp(item->text, "msg_tdmb")==0)
-        )
-    {
-        items_added = 1;
-        startup = 0;
-
-        int cur_icon = 0;
-
-        if (psp_model == PSP_11000){
-            u32 value = 0;
-            vctrlGetRegistryValue("/CONFIG/SYSTEM/XMB/THEME", "custom_theme_mode", &value);
-            cur_icon = !value;
-        }
-
-        // Add CFW Settings
-        new_item = addCustomVshItem(81, "xmbmsgtop_sysconf_configuration", sysconf_tnconfig_action_arg, (cur_icon)?item:signup_item);
-        AddVshItem(a0, topitem, new_item);
-
-        // Add Plugins Manager
-        new_item2 = addCustomVshItem(82, "xmbmsgtop_sysconf_plugins", sysconf_plugins_action_arg, (cur_icon)?item:ps_store_item);
-        AddVshItem(a0, topitem, new_item2);
-
-        // Add Custom Launcher
-        new_item3 = addCustomVshItem(83, "xmbmsgtop_custom_launcher", sysconf_custom_launcher_arg, (cur_icon)?item:information_board_item);
-        AddVshItem(a0, topitem, new_item3);
-        
-        SceIoStat stat; 
-        int ebootFound;
-        if(psp_model == PSP_GO) {
-        	custom_app_path[0] = 'e';
-        	custom_app_path[1] = 'f';
-        	ebootFound = sceIoGetstat(custom_app_path, &stat);
-        	if(ebootFound < 0) {
-        		custom_app_path[0] = 'm'; 
-        		custom_app_path[1] = 's';
-        		ebootFound = sceIoGetstat(custom_app_path, &stat);
-        	}
-        }
-        else {
-        	ebootFound = sceIoGetstat(custom_app_path, &stat);
-        }
-
-        if(ebootFound >= 0) {
-            new_item4 = addCustomVshItem(84, "xmbmsgtop_custom_app", sysconf_custom_app_arg, information_board_item);
-            AddVshItem(a0, topitem, new_item4);
-        }
-
-        SceIoStat _150_file;
-        int _1k_file = sceIoGetstat("ms0:/TM/DCARK/150/reboot150.prx", &_150_file);
-        if((psp_model == PSP_1000) && _1k_file >= 0 && !IS_VITA_ADR(ark_config)) {
-            new_item5 = addCustomVshItem(84, "xmbmsgtop_150_reboot", sysconf_150_reboot_arg, item);
-            AddVshItem(a0, topitem, new_item5);
-        }
-
-    }
-    
     return AddVshItem(a0, topitem, item);
 
 }
@@ -642,7 +555,6 @@ int OnXmbPushPatched(void *arg0, void *arg1)
 int OnXmbContextMenuPatched(void *arg0, void *arg1)
 {
     new_item->context = NULL;
-    new_item2->context = NULL;
     return OnXmbContextMenu(arg0, arg1);
 }
 
@@ -713,39 +625,7 @@ void AddSysconfContextItem(char *text, char *subtitle, char *regkey)
 }
 
 int skipSetting(int i){
-    if (IS_VITA_ADR((ark_config))) return (
-        i == USB_CHARGE ||
-        i == DISABLE_GO_PAUSE ||
-        i == OLD_GO_PLUGINS ||
-        i == NO_HIB_DELETE ||
-        i == DISABLE_LED ||
-        i == DISABLE_UMD ||
-        i == WPA2_SUPPORT ||
-        i == UMD_REGION
-    );
-    else if (psp_model == PSP_1000) return (
-        i == USB_CHARGE ||
-        i == DISABLE_GO_PAUSE ||
-        i == USE_EXTRA_MEM ||
-        i == OLD_GO_PLUGINS ||
-        i == NO_HIB_DELETE
-    );
-    else if (psp_model == PSP_11000) return (
-        i == DISABLE_GO_PAUSE ||
-        i == OLD_GO_PLUGINS ||
-        i == NO_HIB_DELETE ||
-        i == HIDE_MAC ||
-        i == WPA2_SUPPORT
-    );
-    else if (psp_model != PSP_GO) return (
-        i == DISABLE_GO_PAUSE ||
-        i == OLD_GO_PLUGINS ||
-        i == NO_HIB_DELETE
-    );
-    else if (psp_model == PSP_GO) return (
-        i == DISABLE_UMD ||
-        i == UMD_REGION
-    );
+    // PSP HEN: both debug settings are valid on every model
     return 0;
 }
 
@@ -816,7 +696,7 @@ wchar_t *scePafGetTextPatched(void *a0, char *name)
             char* translated = findTranslation(name);
             if (!translated){
                 if(sce_paf_private_strcmp(name, "xmbmsgtop_sysconf_configuration") == 0)
-                    translated = "Custom Firmware Settings";
+                    translated = "\xE2\x98\x85" "Debug Settings"; // star + Debug Settings
                 else if(sce_paf_private_strcmp(name, "xmbmsgtop_sysconf_plugins") == 0)
                     translated = "Plugins Manager";
                 else if(sce_paf_private_strcmp(name, "xmbmsgtop_custom_launcher") == 0)
@@ -824,7 +704,7 @@ wchar_t *scePafGetTextPatched(void *a0, char *name)
                 else if(sce_paf_private_strcmp(name, "xmbmsgtop_custom_app") == 0)
                     translated = "Custom App";
                 else if(sce_paf_private_strcmp(name, "xmbmsgtop_150_reboot") == 0)
-                    translated = "Reboot to 1.50 ARK";
+                    translated = "Reboot to 1.50 PSP HEN";
                 else if (isTranslatableString(name))
                     translated = name; // should have been translated but wasn't
             }
@@ -879,7 +759,7 @@ wchar_t *scePafGetTextPatched(void *a0, char *name)
         else if(sce_paf_private_strcmp(name, "msg_system_update") == 0 && se_config.custom_update)
         {
             char* translated = findTranslation("xmbmsg_system_update");
-            if (!translated) translated = "ARK-4 Updater";
+            if (!translated) translated = "PSP HEN Updater";
             utf8_to_unicode((wchar_t *)user_buffer, translated);
         	return (wchar_t *)user_buffer;
         }
@@ -897,27 +777,11 @@ int vshGetRegistryValuePatched(u32 *option, char *name, void *arg2, int size, in
         {
             int configs[] =
             {
-                config.usbcharge,        
-                config.clock_game,        
-                config.clock_vsh, 
-                config.wpa2,           
-                config.launcher,        
-                config.highmem,        	
-                config.mscache,        	
-                config.infernocache,   
-                config.disablepause,     
-                config.oldplugin,        
-                config.hibblock,    
-                config.skiplogos,        
-                config.hidepics,         	
-                config.hidemac,         
-                config.hidedlc,        	
-                config.noled,        	
-                config.noumd,        	
-                config.noanalog,
-                config.umdregion,
-                config.vshregion,  
-                config.qaflags,            
+                config.qaflags,
+                config.vshregion,
+                config.fpscounter,
+                config.fpscounterpos,
+                config.crashdump,
             };
             
             int i;
@@ -957,27 +821,11 @@ int vshSetRegistryValuePatched(u32 *option, char *name, int size, int *value)
         {
             static int *configs[] =
             {
-                &config.usbcharge,
-                &config.clock_game,
-                &config.clock_vsh,
-                &config.wpa2,
-                &config.launcher,
-                &config.highmem,
-                &config.mscache,
-                &config.infernocache,
-                &config.disablepause,
-                &config.oldplugin,
-                &config.hibblock,
-                &config.skiplogos,
-                &config.hidepics,
-                &config.hidemac,
-                &config.hidedlc,
-                &config.noled,
-                &config.noumd,
-                &config.noanalog,
-                &config.umdregion,
-                &config.vshregion,
                 &config.qaflags,
+                &config.vshregion,
+                &config.fpscounter,
+                &config.fpscounterpos,
+                &config.crashdump,
             };
             
             int i;
@@ -987,7 +835,14 @@ int vshSetRegistryValuePatched(u32 *option, char *name, int size, int *value)
                 {
                     *configs[i] = GetItemes[i].negative ? !(*value) : *value;
                     saveSettings();
-                    if (i == UMD_REGION && config.umdregion) recreate_umd_keys();
+                    if (configs[i] == &config.fpscounter || configs[i] == &config.fpscounterpos || configs[i] == &config.crashdump){
+                        // apply right away, no need to wait for a reboot
+                        sctrlSEGetConfig(&se_config);
+                        se_config.fps_counter = config.fpscounter;
+                        se_config.fps_counter_pos = config.fpscounterpos;
+                        se_config.crash_dump = config.crashdump;
+                        sctrlSESetConfig(&se_config);
+                    }
                     return 0;
                 }
             }

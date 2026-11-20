@@ -1,11 +1,11 @@
 ---
-name: ARK-4 Feature Request
-description: "Request a new feature for ARK-4"
+name: PSP HEN Feature Request
+description: "Request a new feature for PSP HEN"
 labels: ["Feature Request"]
 body:
   - type: markdown
     attributes:
-      value: Please explain in depth your Feature Request for ARK-4.
+      value: Please explain in depth your Feature Request for PSP HEN.
   - type: textarea
     attributes:
       label: New Feature

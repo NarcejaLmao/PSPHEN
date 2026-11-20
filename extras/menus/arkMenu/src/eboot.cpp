@@ -21,8 +21,44 @@ Eboot::~Eboot(){
 }
 
 void Eboot::readHeader(){
+    // A directory entry is not guaranteed to be a valid PBP. Clear the
+    // header first so truncated or unreadable files cannot leave garbage
+    // offsets that later get used for allocations or seeks.
+    memset(&header, 0, sizeof(header));
+
     FILE* fp = fopen(this->path.c_str(), "rb");
-    fread(&header, 1, sizeof(PBPHeader), fp);
+    if (fp == NULL) return;
+
+    if (fread(&header, 1, sizeof(PBPHeader), fp) != sizeof(PBPHeader)){
+        memset(&header, 0, sizeof(header));
+        fclose(fp);
+        return;
+    }
+
+    if (header.magic != EBOOT_MAGIC){
+        memset(&header, 0, sizeof(header));
+        fclose(fp);
+        return;
+    }
+
+    long file_size = 0;
+    if (fseek(fp, 0, SEEK_END) == 0) file_size = ftell(fp);
+
+    // PBP section offsets must be ordered and stay inside the file.
+    const u32 offsets[] = {
+        header.param_offset, header.icon0_offset, header.icon1_offset,
+        header.pic0_offset, header.pic1_offset, header.snd0_offset,
+        header.elf_offset, header.psar_offset
+    };
+    bool valid = file_size >= (long)sizeof(PBPHeader);
+    for (unsigned int i = 0; valid && i < sizeof(offsets)/sizeof(offsets[0]); i++){
+        if (offsets[i] < sizeof(PBPHeader) || offsets[i] > (u32)file_size)
+            valid = false;
+        if (i > 0 && offsets[i] < offsets[i-1])
+            valid = false;
+    }
+
+    if (!valid) memset(&header, 0, sizeof(header));
     fclose(fp);
 }
 
@@ -93,9 +129,27 @@ void Eboot::loadAVMedia(){
 }
 
 void Eboot::readFile(void* dst, unsigned offset, unsigned size){
+    if (dst == NULL || size == 0 || header.magic != EBOOT_MAGIC) return;
+
     FILE* src = fopen(this->path.c_str(), "rb");
-    fseek(src, offset, SEEK_SET);
-    fread(dst, size, 1, src);
+    if (src == NULL) return;
+
+    if (fseek(src, 0, SEEK_END) != 0){
+        fclose(src);
+        return;
+    }
+
+    long file_size = ftell(src);
+    if (file_size < 0 || offset > (unsigned long)file_size ||
+        size > (unsigned long)file_size - offset ||
+        fseek(src, offset, SEEK_SET) != 0){
+        fclose(src);
+        return;
+    }
+
+    // Callers zero-initialize media buffers; only overwrite them when the
+    // complete requested section can be read.
+    fread(dst, 1, size, src);
     fclose(src);
 }
 
@@ -107,6 +161,8 @@ int Eboot::getEbootType(const char* path){
         return TYPE_UPDATER;
 
     Eboot e(path);
+    if (e.header.magic != EBOOT_MAGIC) return UNKNOWN_TYPE;
+
     u32 size = e.header.icon0_offset - e.header.param_offset;
     if (size){
 
@@ -134,7 +190,7 @@ string Eboot::fullEbootPath(string path, string app, bool scan_dlc){
 
     static const char* EBOOT_150 = "%/EBOOT.PBP"; // 1.50 homebrew
     static const char* EBOOT_PBP = "/EBOOT.PBP";  // Normal EBOOT
-    static const char* EBOOT_ARK = "/"VBOOT_PBP;  // ARK EBOOT
+    static const char* EBOOT_ARK = "/"VBOOT_PBP;  // PSP HEN EBOOT
     static const char* EBOOT_CEF = "/FBOOT.PBP";  // TN CEF EBOOT
     static const char* EBOOT_HBL = "/WMENU.BIN";  // VHBL EBOOT
     static const char* PBOOT_PBP = "/PBOOT.PBP";  // Update file

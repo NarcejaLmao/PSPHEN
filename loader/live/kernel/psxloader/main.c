@@ -206,7 +206,7 @@ int exploitEntry(){
     initScreen(NULL);
 
     // now we can draw things!
-    PRTSTR("Loading ARK-4 in ePSX mode");
+    PRTSTR("Loading PSP HEN in ePSX mode");
 
     PRTSTR("Patching FLASH0");
     patchKermitPeripheral(k_tbl);

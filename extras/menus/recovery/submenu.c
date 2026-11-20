@@ -65,23 +65,22 @@ char* ark_hidepics_options[] = {
     (char*)"PIC1"
 };
 
+char* ark_fpspos_options[] = {
+    (char*)"Top Left",
+    (char*)"Top Right",
+    (char*)"Top Middle",
+    (char*)"Bottom Left",
+    (char*)"Bottom Right",
+    (char*)"Bottom Middle"
+};
+
 // PSP 1K
 Setting settings_items_1k[] =
 {
-    { 4, &(config.clock_game), "CPU Clock in Game", ark_clock_settings },
-    { 4, &(config.clock_vsh), "CPU Clock in XMB", ark_clock_settings },
-    { 2, &(config.wpa2), "WPA2 Support", ark_settings_boolean },
-    { 2, &(config.launcher), "Autoboot Launcher", ark_settings_boolean },
-    { 2, &(config.mscache), "Memory Stick Speedup", ark_settings_boolean },
-    { 3, &(config.infernocache), "Inferno Cache", ark_settings_infernocache },
-    { 4, &(config.skiplogos), "Skip Sony Logos", ark_skiplogos_options },
-    { 4, &(config.hidepics), "Hide PIC0 and PIC1", ark_hidepics_options },
-    { 2, &(config.hidemac), "Hide MAC Address", ark_settings_boolean },
-    { 2, &(config.hidedlc), "Hide DLC", ark_settings_boolean },
-    { 2, &(config.noled), "Turn off LEDs", ark_settings_boolean },
-    { 2, &(config.noumd), "Disable UMD Drive", ark_settings_boolean },
-    { 2, &(config.noanalog), "Disable Analog Stick", ark_settings_boolean },
-    { 2, &(config.qaflags), "Enable QA Flags", ark_settings_boolean },
+    { 2, &(config.qaflags), "QA Flags", ark_settings_boolean },
+    { 2, &(config.fpscounter), "FPS Counter", ark_settings_boolean },
+    { 6, &(config.fpscounterpos), "FPS Counter Position", ark_fpspos_options },
+    { 2, &(config.crashdump), "Crash Dump", ark_settings_boolean },
 };
 
 #define N_SETTINGS_1K (sizeof(settings_items_1k)/sizeof(settings_items_1k[0]))
@@ -89,22 +88,10 @@ Setting settings_items_1k[] =
 // PSP Slim
 Setting settings_items_slim[] =
 {
-    { 2, &(config.usbcharge), "USB Charge", ark_settings_boolean },
-    { 4, &(config.clock_game), "CPU Clock in Game", ark_clock_settings },
-    { 4, &(config.clock_vsh), "CPU Clock in XMB", ark_clock_settings },
-    { 2, &(config.wpa2), "WPA2 Support", ark_settings_boolean },
-    { 2, &(config.launcher), "Autoboot Launcher", ark_settings_boolean },
-    { 2, &(config.highmem), "Use Extra Memory", ark_settings_boolean2 },
-    { 2, &(config.mscache), "Memory Stick Speedup", ark_settings_boolean },
-    { 3, &(config.infernocache), "Inferno Cache", ark_settings_infernocache },
-    { 4, &(config.skiplogos), "Skip Sony Logos", ark_skiplogos_options },
-    { 4, &(config.hidepics), "Hide PIC0 and PIC1", ark_hidepics_options },
-    { 2, &(config.hidemac), "Hide MAC Address", ark_settings_boolean },
-    { 2, &(config.hidedlc), "Hide DLC", ark_settings_boolean },
-    { 2, &(config.noled), "Turn off LEDs", ark_settings_boolean },
-    { 2, &(config.noumd), "Disable UMD Drive", ark_settings_boolean },
-    { 2, &(config.noanalog), "Disable Analog Stick", ark_settings_boolean },
-    { 2, &(config.qaflags), "Enable QA Flags", ark_settings_boolean },
+    { 2, &(config.qaflags), "QA Flags", ark_settings_boolean },
+    { 2, &(config.fpscounter), "FPS Counter", ark_settings_boolean },
+    { 6, &(config.fpscounterpos), "FPS Counter Position", ark_fpspos_options },
+    { 2, &(config.crashdump), "Crash Dump", ark_settings_boolean },
 };
 
 #define N_SETTINGS_SLIM (sizeof(settings_items_slim)/sizeof(settings_items_slim[0]))
@@ -112,24 +99,10 @@ Setting settings_items_slim[] =
 // PSP GO
 Setting settings_items_go[] =
 {
-    { 2, &(config.usbcharge), "USB Charge", ark_settings_boolean },
-    { 4, &(config.clock_game), "CPU Clock in Game", ark_clock_settings },
-    { 4, &(config.clock_vsh), "CPU Clock in XMB", ark_clock_settings },
-    { 2, &(config.wpa2), "WPA2 Support", ark_settings_boolean },
-    { 2, &(config.launcher), "Autoboot Launcher", ark_settings_boolean },
-    { 2, &(config.highmem), "Use Extra Memory", ark_settings_boolean2 },
-    { 2, &(config.mscache), "Memory Stick Speedup", ark_settings_boolean },
-    { 3, &(config.infernocache), "Inferno Cache", ark_settings_infernocache },
-    { 2, &(config.disablepause), "Disable Pause Feature", ark_settings_boolean2 },
-    { 2, &(config.oldplugin), "Old Plugin Support on ef0", ark_settings_boolean },
-    { 2, &(config.hibblock), "Prevent hibernation deletion", ark_settings_boolean },
-    { 4, &(config.skiplogos), "Skip Sony Logos", ark_skiplogos_options },
-    { 4, &(config.hidepics), "Hide PIC0 and PIC1", ark_hidepics_options },
-    { 2, &(config.hidemac), "Hide MAC Address", ark_settings_boolean },
-    { 2, &(config.hidedlc), "Hide DLC", ark_settings_boolean },
-    { 2, &(config.noled), "Turn off LEDs", ark_settings_boolean },
-    { 2, &(config.noanalog), "Disable Analog Stick", ark_settings_boolean },
-    { 2, &(config.qaflags), "Enable QA Flags", ark_settings_boolean },
+    { 2, &(config.qaflags), "QA Flags", ark_settings_boolean },
+    { 2, &(config.fpscounter), "FPS Counter", ark_settings_boolean },
+    { 6, &(config.fpscounterpos), "FPS Counter Position", ark_fpspos_options },
+    { 2, &(config.crashdump), "Crash Dump", ark_settings_boolean },
 };
 
 #define N_SETTINGS_GO (sizeof(settings_items_go)/sizeof(settings_items_go[0]))
@@ -137,50 +110,30 @@ Setting settings_items_go[] =
 // PSP 110000 (Street)
 Setting settings_items_street[] =
 {
-    { 2, &(config.usbcharge), "USB Charge", ark_settings_boolean },
-    { 4, &(config.clock_game), "CPU Clock in Game", ark_clock_settings },
-    { 4, &(config.clock_vsh), "CPU Clock in XMB", ark_clock_settings },
-    { 2, &(config.launcher), "Autoboot Launcher", ark_settings_boolean },
-    { 2, &(config.highmem), "Use Extra Memory", ark_settings_boolean2 },
-    { 2, &(config.mscache), "Memory Stick Speedup", ark_settings_boolean },
-    { 3, &(config.infernocache), "Inferno Cache", ark_settings_infernocache },
-    { 4, &(config.skiplogos), "Skip Sony Logos", ark_skiplogos_options },
-    { 4, &(config.hidepics), "Hide PIC0 and PIC1", ark_hidepics_options },
-    { 2, &(config.hidedlc), "Hide DLC", ark_settings_boolean },
-    { 2, &(config.noled), "Turn off LEDs", ark_settings_boolean },
-    { 2, &(config.noumd), "Disable UMD Drive", ark_settings_boolean },
-    { 2, &(config.noanalog), "Disable Analog Stick", ark_settings_boolean },
-    { 2, &(config.qaflags), "Enable QA Flags", ark_settings_boolean },
+    { 2, &(config.qaflags), "QA Flags", ark_settings_boolean },
+    { 2, &(config.fpscounter), "FPS Counter", ark_settings_boolean },
+    { 6, &(config.fpscounterpos), "FPS Counter Position", ark_fpspos_options },
+    { 2, &(config.crashdump), "Crash Dump", ark_settings_boolean },
 };
 
 #define N_SETTINGS_STREET (sizeof(settings_items_street)/sizeof(settings_items_street[0]))
 
 Setting settings_items_adr[] =
 {
-    { 4, &(config.clock_game), "CPU Clock in Game", ark_clock_settings },
-    { 4, &(config.clock_vsh), "CPU Clock in XMB", ark_clock_settings },
-    { 2, &(config.launcher), "Autoboot Launcher", ark_settings_boolean },
-    { 2, &(config.highmem), "Use Extra Memory", ark_settings_boolean2 },
-    { 2, &(config.mscache), "Memory Stick Speedup", ark_settings_boolean },
-    { 3, &(config.infernocache), "Inferno Cache", ark_settings_infernocache },
-    { 4, &(config.skiplogos), "Skip Sony Logos", ark_skiplogos_options },
-    { 4, &(config.hidepics), "Hide PIC0 and PIC1", ark_hidepics_options },
-    { 2, &(config.hidemac), "Hide MAC Address", ark_settings_boolean },
-    { 2, &(config.hidedlc), "Hide DLC", ark_settings_boolean },
-    { 2, &(config.noled), "Turn off LEDs", ark_settings_boolean },
-    { 2, &(config.noumd), "Disable UMD Drive", ark_settings_boolean },
-    { 2, &(config.noanalog), "Disable Analog Stick", ark_settings_boolean },
     { 2, &(config.qaflags), "QA Flags", ark_settings_boolean },
+    { 2, &(config.fpscounter), "FPS Counter", ark_settings_boolean },
+    { 6, &(config.fpscounterpos), "FPS Counter Position", ark_fpspos_options },
+    { 2, &(config.crashdump), "Crash Dump", ark_settings_boolean },
 };
 
 #define N_SETTINGS_ADR (sizeof(settings_items_adr)/sizeof(settings_items_adr[0]))
 
 Setting settings_items_vita[] =
 {
-    { 4, &(config.clock_game), "CPU Clock in Game", ark_clock_settings },
-    { 2, &(config.mscache), "Memory Stick Speedup", ark_settings_boolean },
-    { 3, &(config.infernocache), "Inferno Cache", ark_settings_infernocache },
-    { 2, &(config.highmem), "Use Extra Memory", ark_settings_boolean2 },
+    { 2, &(config.qaflags), "QA Flags", ark_settings_boolean },
+    { 2, &(config.fpscounter), "FPS Counter", ark_settings_boolean },
+    { 6, &(config.fpscounterpos), "FPS Counter Position", ark_fpspos_options },
+    { 2, &(config.crashdump), "Crash Dump", ark_settings_boolean },
 };
 
 #define N_SETTINGS_VITA (sizeof(settings_items_vita)/sizeof(settings_items_vita[0]))
@@ -351,7 +304,7 @@ void settings_submenu(){
     char** states;
     int size;
     Setting* settings_items;
-    char* header = "Custom Firmware Settings";
+    char* header = "PSP HEN Debug Settings";
 
     if(IS_VITA(ark_config)) {
         if(IS_VITA_ADR(ark_config)) {

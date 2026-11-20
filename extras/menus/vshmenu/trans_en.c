@@ -41,7 +41,7 @@ const char *g_messages_en[] = {
     "IMPORT CLASSIC PLUGINS",
     "ACTIVATE FLASH AND WMA",
     "DELETE HIBERNATION",
-    "RESET ARK SETTINGS",
+    "RESET PSP HEN SETTINGS",
     "GO BACK",
     "NO HIBERNATION SUPPORT",
     "Normal -> Pandora",

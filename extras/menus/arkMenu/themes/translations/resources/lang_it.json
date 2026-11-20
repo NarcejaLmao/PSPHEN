@@ -133,7 +133,7 @@
     "ICON0 in Browser": "ICON0 nel Browser",
     "Show Game Path": "Mostra percorso di gioco",
 
-    "ARK Custom Firmware Settings": "Impostazioni Custom Firmware ARK",
+    "PSP HEN Custom Firmware Settings": "Impostazioni Custom Firmware PSP HEN",
     "CFW Settings": "Impostazioni CFW",
     "Launcher/Recovery Settings": "Impostazioni Launcher/Recovery",
     "Menu Settings": "Impostazioni menú",
@@ -172,11 +172,11 @@
     "Latin America": "America Latina",
     "China": "Cina",
 
-    "xmbmsg_system_update": "Aggiornamento ARK-4",
+    "xmbmsg_system_update": "Aggiornamento PSP HEN",
     "xmbmsgtop_sysconf_configuration": "Configurazioni CFW",
     "xmbmsgtop_sysconf_plugins": "Gestione Plugin",
     "xmbmsgtop_custom_launcher": "Custom Launcher",
     "xmbmsgtop_custom_app": "App personalizzata",
-    "xmbmsgtop_150_reboot": "Riavvia in 1.50 ARK"
+    "xmbmsgtop_150_reboot": "Riavvia in 1.50 PSP HEN"
 
 }

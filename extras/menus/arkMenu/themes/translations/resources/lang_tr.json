@@ -133,7 +133,7 @@
     "ICON0 in Browser": "Tarayicida ICON0",
     "Show Game Path": "Oyun Dizinini Göster",
 
-    "ARK Custom Firmware Settings": "ARK Custom Firmware Ayarlari",
+    "PSP HEN Custom Firmware Settings": "PSP HEN Custom Firmware Ayarlari",
     "CFW Settings": "CFW Ayarlari",
     "Launcher/Recovery Settings": "Başlatici/Kurtarma Ayarlari",
     "Menu Settings": "Menü Ayarlari",
@@ -177,10 +177,10 @@
     "Debug I": "Debug I",
     "Debug II": "Debug II",
 
-    "xmbmsg_system_update": "ARK-4 Güncelleyicisi",
+    "xmbmsg_system_update": "PSP HEN Güncelleyicisi",
     "xmbmsgtop_sysconf_configuration": "CFW Ayarlari",
     "xmbmsgtop_sysconf_plugins": "Gestionnaire de plug-ins",
     "xmbmsgtop_custom_launcher": "Özel Yükleyici",
     "xmbmsgtop_custom_app": "Özel Uygulama",
-    "xmbmsgtop_150_reboot": "1.50 ARK'a Rebootla"
+    "xmbmsgtop_150_reboot": "1.50 PSP HEN'a Rebootla"
 }

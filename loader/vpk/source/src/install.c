@@ -50,14 +50,14 @@ int checkTaiConfig() {
 
 int installAnalogPlugin() {
     sceIoMkdir("ur0:tai", 0777);
-    updateUi("Checking for ARK Right Analog Plugin ...");
+    updateUi("Checking for PSP HEN Right Analog Plugin ...");
     int pluginCheck = sceIoOpen("ur0:tai/arkrightanalog.suprx", SCE_O_RDONLY, 0777);
     if(pluginCheck < 0) {
-        updateUi("ARK Right Analog Plugin not found adding to config ...");
+        updateUi("PSP HEN Right Analog Plugin not found adding to config ...");
         CopyFileAndUpdateUi("app0:psp/arkrightanalog.suprx", "ur0:tai/arkrightanalog.suprx");
         int hasNewLine = checkTaiConfig();
         int addPlugin = sceIoOpen("ur0:tai/config.txt", SCE_O_CREAT | SCE_O_WRONLY | SCE_O_APPEND, 0777);
-        static char pluginLine[] = "# Add second analog support to ARK\n*NPUZ01234\nur0:tai/arkrightanalog.suprx";
+        static char pluginLine[] = "# Add second analog support to PSP HEN\n*NPUZ01234\nur0:tai/arkrightanalog.suprx";
         if (!hasNewLine) sceIoWrite(addPlugin, "\n", 1);
         sceIoWrite(addPlugin, pluginLine, sizeof(pluginLine)-1);
         sceIoClose(addPlugin);
@@ -65,7 +65,7 @@ int installAnalogPlugin() {
     }
     else {
         sceIoClose(pluginCheck);
-        updateUi("ARK Right Analog Plugin found updating plugin and base game only ...");
+        updateUi("PSP HEN Right Analog Plugin found updating plugin and base game only ...");
         CopyFileAndUpdateUi("app0:psp/arkrightanalog.suprx", "ur0:tai/arkrightanalog.suprx");
         return 0;
     }

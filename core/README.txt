@@ -22,4 +22,4 @@ Only a few modules and parts of the kernel are allowed to break rules:
 3. Externally loaded rebootex can break all rules.
 
 
-These guidelines allow ARK to be as robust as possible while also working with as many different models and devices.
+These guidelines allow PSP HEN to be as robust as possible while also working with as many different models and devices.

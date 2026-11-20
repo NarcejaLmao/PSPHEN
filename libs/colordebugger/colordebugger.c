@@ -39,7 +39,7 @@ void colorDebug(u32 color)
         // Set Pixel Color
         g_vram_base[i] = color;
     }
-    if (screen_handler) screen_handler(g_vram_base);
+    if (screen_handler) screen_handler((u32)g_vram_base);
 }
 
 void setScreenHandler(void (*handler)(u32 vram)){

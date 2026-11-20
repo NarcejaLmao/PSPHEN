@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# ArkFast updater script by Yoti for ARK-4 project
+# ArkFast updater script by Yoti for PSP HEN project
 # 2022-09-06: initial release
 # 2022-09-06: fix kexploit -1
 # 2022-09-23: cleanup files
@@ -65,8 +65,8 @@ mv -f ARK_01234.zip ../ArkFast_tmp/resources/ARK_01234.zip
 cd ..
 rm -rf ARK4_tmp/
 cd ArkFast_tmp/
-sed -i 's/ARK-2/ARK-4/g' script.lua
-sed -i 's/ARK2/ARK-4/g' script.lua
+sed -i 's/ARK-2/PSP HEN/g' script.lua
+sed -i 's/ARK2/PSP HEN/g' script.lua
 sed -i 's/CLON(s)/CLONE(s)/g' script.lua
 sed -i 's/PSVita /PS Vita /g' script.lua
 zip -r ../ArkFast_new.vpk .
