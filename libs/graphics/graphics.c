@@ -83,15 +83,33 @@ void printTextScreen(int x, int y, const char * text, u32 color)
     }
 }
 
-void print_to_screen_color(const char * text, u32 color) 
+/*
+ * Scroll the execution console instead of clearing it when it reaches the
+ * bottom of the display. Earlier exploit messages remain visible.
+ */
+static void scrollConsole(void)
 {
-    if (gY > 272) 
+    const int scrollLines = 12;
+    const unsigned int visibleWords = PSP_LINE_SIZE * (SCREEN_HEIGHT - scrollLines);
+
+    memmove(g_vram_base,
+            g_vram_base + (PSP_LINE_SIZE * scrollLines),
+            visibleWords * sizeof(u32));
+    memset(g_vram_base + visibleWords, 0,
+           PSP_LINE_SIZE * scrollLines * sizeof(u32));
+    gY -= scrollLines;
+}
+
+void print_to_screen_color(const char * text, u32 color)
+{
+    /* Each console row advances 12 pixels; glyphs are 8 pixels tall. */
+    if (gY + 8 > SCREEN_HEIGHT)
     {
-        cls();
-      }
-    
-      printTextScreen(0, gY, text, color);
-      gY += 12;
+        scrollConsole();
+    }
+
+    printTextScreen(0, gY, text, color);
+    gY += 12;
 }
 
 
