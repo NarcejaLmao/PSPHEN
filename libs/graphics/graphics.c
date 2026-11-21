@@ -83,6 +83,118 @@ void printTextScreen(int x, int y, const char * text, u32 color)
     }
 }
 
+
+/* PS3-style PSP HEN activation toast. The saved pixels let the banner fade
+ * back to the exact console contents that were underneath it. */
+#define ACHIEVEMENT_X 12
+#define ACHIEVEMENT_Y 12
+#define ACHIEVEMENT_W 260
+#define ACHIEVEMENT_H 52
+#define ACHIEVEMENT_FRAMES 300
+#define ACHIEVEMENT_FADE_START 240
+
+static u32 achievementBackground[ACHIEVEMENT_W * ACHIEVEMENT_H];
+
+static u32 blendColor(u32 from, u32 to, unsigned int amount)
+{
+    unsigned int inv = 255 - amount;
+    unsigned int r = (((from & 0xFF) * inv) + ((to & 0xFF) * amount)) / 255;
+    unsigned int g = ((((from >> 8) & 0xFF) * inv) + (((to >> 8) & 0xFF) * amount)) / 255;
+    unsigned int b = ((((from >> 16) & 0xFF) * inv) + (((to >> 16) & 0xFF) * amount)) / 255;
+    return 0xFF000000 | (b << 16) | (g << 8) | r;
+}
+
+static void fillRect(int x, int y, int width, int height, u32 color)
+{
+    int row, col;
+    for (row = 0; row < height; ++row)
+    {
+        u32 *pixel = g_vram_base + (y + row) * PSP_LINE_SIZE + x;
+        for (col = 0; col < width; ++col) pixel[col] = color;
+    }
+}
+
+static void drawAchievement(unsigned int opacity)
+{
+    int x, y;
+    const u32 panel = 0xFF171A20;
+    const u32 blue = 0xFF3B9DEB;
+    const u32 white = 0xFFFFFFFF;
+    const u32 muted = 0xFFB9C5D2;
+
+    /* Restore the original console pixels, then composite the toast. */
+    for (y = 0; y < ACHIEVEMENT_H; ++y)
+    {
+        u32 *dst = g_vram_base + (ACHIEVEMENT_Y + y) * PSP_LINE_SIZE + ACHIEVEMENT_X;
+        for (x = 0; x < ACHIEVEMENT_W; ++x)
+        {
+            u32 toast = panel;
+            if (x < 4) toast = blue;
+            else if (y == 0 || y == ACHIEVEMENT_H - 1) toast = 0xFF39424D;
+            dst[x] = toast;
+        }
+    }
+
+    /* Small trophy mark and the two-line achievement label. */
+    fillRect(ACHIEVEMENT_X + 17, ACHIEVEMENT_Y + 16, 5, 13, blue);
+    fillRect(ACHIEVEMENT_X + 13, ACHIEVEMENT_Y + 16, 4, 4, blue);
+    fillRect(ACHIEVEMENT_X + 22, ACHIEVEMENT_Y + 16, 4, 4, blue);
+    fillRect(ACHIEVEMENT_X + 16, ACHIEVEMENT_Y + 29, 10, 3, blue);
+    fillRect(ACHIEVEMENT_X + 13, ACHIEVEMENT_Y + 32, 16, 3, blue);
+
+    /* Text is drawn into a temporary overlay and blended with the saved
+       framebuffer below, so its edges fade along with the panel. */
+    printTextScreen(ACHIEVEMENT_X + 39, ACHIEVEMENT_Y + 10,
+                    "PSP HEN ACTIVATED", white);
+    printTextScreen(ACHIEVEMENT_X + 39, ACHIEVEMENT_Y + 27,
+                    "Achievement unlocked", muted);
+
+    /* Composite the complete panel, icon, and text over the saved console
+       pixels so every part of the notification fades together. */
+    for (y = 0; y < ACHIEVEMENT_H; ++y)
+    {
+        u32 *dst = g_vram_base + (ACHIEVEMENT_Y + y) * PSP_LINE_SIZE + ACHIEVEMENT_X;
+        for (x = 0; x < ACHIEVEMENT_W; ++x)
+        {
+            u32 original = achievementBackground[y * ACHIEVEMENT_W + x];
+            dst[x] = blendColor(original, dst[x], opacity);
+        }
+    }
+}
+
+void showPspHenAchievement(void (*delayThread)(unsigned int))
+{
+    int x, y, frame;
+    if (delayThread == NULL) return;
+
+    for (y = 0; y < ACHIEVEMENT_H; ++y)
+    {
+        const u32 *src = g_vram_base + (ACHIEVEMENT_Y + y) * PSP_LINE_SIZE + ACHIEVEMENT_X;
+        for (x = 0; x < ACHIEVEMENT_W; ++x)
+            achievementBackground[y * ACHIEVEMENT_W + x] = src[x];
+    }
+
+    for (frame = 0; frame < ACHIEVEMENT_FRAMES; ++frame)
+    {
+        unsigned int opacity = 255;
+        if (frame >= ACHIEVEMENT_FADE_START)
+            opacity = (unsigned int)(255 * (ACHIEVEMENT_FRAMES - 1 - frame) /
+                                     (ACHIEVEMENT_FRAMES - ACHIEVEMENT_FADE_START));
+        drawAchievement(opacity);
+        if (screen_handler) screen_handler((u32)g_vram_base);
+        delayThread(16667); /* ~60 Hz: 5 seconds total, last second fades out. */
+    }
+
+    /* Restore the console exactly after the toast has disappeared. */
+    for (y = 0; y < ACHIEVEMENT_H; ++y)
+    {
+        u32 *dst = g_vram_base + (ACHIEVEMENT_Y + y) * PSP_LINE_SIZE + ACHIEVEMENT_X;
+        for (x = 0; x < ACHIEVEMENT_W; ++x)
+            dst[x] = achievementBackground[y * ACHIEVEMENT_W + x];
+    }
+    if (screen_handler) screen_handler((u32)g_vram_base);
+}
+
 /*
  * Scroll the active PSP framebuffer up by one text row.  Copy complete
  * framebuffer rows (including the unused stride pixels) so the display

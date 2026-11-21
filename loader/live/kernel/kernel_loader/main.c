@@ -5,14 +5,10 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
-
- * PRO CFW is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
  *
- * You should have received a copy of the GNU General Public License
- * along with PRO CFW. If not, see <http://www.gnu.org/licenses/ .
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
  */
 
 #include "main.h"
@@ -47,7 +43,6 @@ int exploitEntry(ARKConfig* arg0, UserFunctions* arg1, char* kxploit_file){
 
     // Clear BSS Segment
     clearBSS();
-
     void (*KernelExitGame)() = (void*)RelocImport("LoadExecForUser", 0x05572A5F, 0);
 
     // init function table
@@ -55,9 +50,9 @@ int exploitEntry(ARKConfig* arg0, UserFunctions* arg1, char* kxploit_file){
         scanUserFunctions(g_tbl);
     else
         memcpy(g_tbl, arg1, sizeof(UserFunctions));
-    
+
     if (arg0 == NULL) arg0 = &default_config;
-    
+
     scanArkFunctions(g_tbl);
 
     // copy the path of the save
@@ -69,36 +64,28 @@ int exploitEntry(ARKConfig* arg0, UserFunctions* arg1, char* kxploit_file){
     // init screen
     initScreen(g_tbl->DisplaySetFrameBuf);
 
-    PRTSTR("Loading PSP HEN");
-    PRTSTR("Initializing exploit environment...");
-    PRTSTR("Resolving system function table...");
-    PRTSTR("Checking available memory...");
-    
+    PRTSTR("PSPHEN: Stage 2 initialized");
+    PRTSTR("PSPHEN: Function tables ready");
+    PRTSTR("PSPHEN: Checking available memory");
     g_tbl->freeMem(g_tbl);
-    PRTSTR("Memory preparation complete.");
-    
+
     // read kxploit file into memory and initialize it
     char* err = NULL;
     int res = 0;
-    PRTSTR("Reading kernel exploit payload...");
+    PRTSTR("PSPHEN: Preparing exploit payload");
+    PRTSTR("Reading kxploit file...");
     if ((res=initKxploitFile(kxploit_file)) == 0){
-        PRTSTR("Kernel exploit payload loaded.");
-        PRTSTR("Resolving required kernel stubs...");
-        PRTSTR("Scanning system imports for exploit...");
+        PRTSTR("PSPHEN: Exploit payload loaded");
+        PRTSTR("Scanning stubs for kxploit...");
         if ((res=kxf->stubScanner(g_tbl)) == 0){
-            PRTSTR("Required kernel stubs resolved.");
-            PRTSTR("Preparing kernel exploit trigger...");
-            // Corrupt Kernel
-            PRTSTR("Executing kernel exploit...");
+            PRTSTR("PSPHEN: Required exploit stubs found");
+            PRTSTR("Doing kernel exploit...");
             if ((res=kxf->doExploit()) == 0){
-                PRTSTR("Kernel exploit trigger completed.");
-                PRTSTR("Preparing privilege escalation...");
-                // Output Loading Screen
+                PRTSTR("PSPHEN: Exploit trigger completed");
                 PRTSTR("Escalating privileges...");
-                // Flush Cache
+                PRTSTR("PSPHEN: Preparing kernel transition");
                 g_tbl->KernelDcacheWritebackAll();
-                // Trigger Kernel Permission Callback
-                PRTSTR("Invoking kernel-side loader...");
+                PRTSTR("PSPHEN: Invoking kernel callback");
                 kxf->executeKernel(KERNELIFY(&kernelContentFunction));
                 err = "Could not execute kernel function";
                 res = -1;
@@ -114,9 +101,9 @@ int exploitEntry(ARKConfig* arg0, UserFunctions* arg1, char* kxploit_file){
     else{
         err = "Could not open kxploit file!";
     }
-    
-    PRTSTR2("ERROR (%p): %s", res, err);
-    PRTSTR("Exiting...");
+
+    PRTSTR2("PSPHEN: Execution stopped (code %p): %s", res, err);
+    PRTSTR("PSPHEN: Returning to XMB...");
     g_tbl->KernelDelayThread(5000000);
     if (KernelExitGame) KernelExitGame();
 
@@ -125,72 +112,44 @@ int exploitEntry(ARKConfig* arg0, UserFunctions* arg1, char* kxploit_file){
 
 int autoDetectDevice(ARKConfig* config){
     // determine execution mode by scanning for certain modules
+    PRTSTR("PSPHEN: Checking device environment");
     if (k_tbl->KernelFindModuleByName == NULL) return -1;
     SceModule2* kermit_peripheral = k_tbl->KernelFindModuleByName("sceKermitPeripheral_Driver");
-    if (kermit_peripheral){ // kermit is Vita-only
+    if (kermit_peripheral){
         SceModule2* pspvmc = k_tbl->KernelFindModuleByName("pspvmc_Library");
-        if (pspvmc){ // pspvmc loaded means we're in Vita POPS
+        if (pspvmc){
             config->exec_mode = PSV_POPS;
+            PRTSTR("PSPHEN: Environment: Vita POPS");
             return 0;
         }
         else{
             SceModule2* sctrl = k_tbl->KernelFindModuleByName("SystemControl");
             if (sctrl){
-                // SystemControl loaded mean's we're running under a Custom Firmware
                 if (k_tbl->KernelFindModuleByName("ARKCompatLayer") != NULL){
-                    // ARK
                     return -1;
                 }
                 else{
-                    // Adrenaline
                     config->exec_mode = PSV_ADR;
+                    PRTSTR("PSPHEN: Environment: Adrenaline");
                     return 0;
                 }
             }
-            else{ // no module found, must be stock pspemu
+            else{
                 config->exec_mode = PS_VITA;
+                PRTSTR("PSPHEN: Environment: Vita ePSP");
                 return 0;
             }
         }
     }
-    else{ // no kermit, not a vita
+    else{
         config->exec_mode = PSP_ORIG;
+        PRTSTR("PSPHEN: Environment: PSP");
         return 0;
     }
 }
 
-int initKxploitFile(char* kxploit_file){
-    SceUID fd;
-    char k_path[ARK_PATH_SIZE];
-    if ( kxploit_file == NULL || ((fd = g_tbl->IoOpen(kxploit_file, PSP_O_RDONLY, 0)) < 0) ){
-        strcpy(k_path, g_tbl->config->arkpath);
-        strcat(k_path, K_FILE);
-        fd = g_tbl->IoOpen(k_path, PSP_O_RDONLY, 0);
-        if (fd<0) return -1;
-        kxploit_file = k_path;
-    }
-    PRTSTR1("Opening exploit payload: %s", kxploit_file);
-    PRTSTR("Clearing exploit payload memory...");
-    kbin_path = kxploit_file;
-    memset((void *)KXPLOIT_LOADADDR, 0, 0x4000);
-    int bytes_read = g_tbl->IoRead(fd, (void *)KXPLOIT_LOADADDR, 0x4000);
-    g_tbl->IoClose(fd);
-    if (bytes_read <= 0){
-        PRTSTR("ERROR: Exploit payload is empty or unreadable.");
-        return -1;
-    }
-    PRTSTR1("Payload read: %d bytes", bytes_read);
-    PRTSTR("Flushing payload instruction cache...");
-    g_tbl->KernelDcacheWritebackAll();
-    PRTSTR("Initializing exploit entry point...");
-    kEntryPoint(kxf);
-    PRTSTR("Exploit entry point initialized.");
-    return 0;
-}
-
 // Fake K1 Kernel Setting
 void setK1Kernel(void){
-    // Set K1 to Kernel Value
     __asm__ (
         "nop\n"
         "lui $k1,0x0\n"
@@ -200,67 +159,66 @@ void setK1Kernel(void){
 // Kernel Permission Function
 void kernelContentFunction(void){
 
+    PRTSTR("PSPHEN: Kernel callback reached");
     if (!isKernel()){
-        return; // we don't have kernel privilages? better error out than crash
+        PRTSTR("PSPHEN ERROR: Kernel privileges not available");
+        return;
     }
 
-    // Switch to Kernel Permission Level
+    PRTSTR("PSPHEN: Kernel privileges confirmed");
     setK1Kernel();
-    
+
     g_tbl->prtstr = KERNELIFY(g_tbl->prtstr);
     kxf->repairInstruction = KERNELIFY(kxf->repairInstruction);
 
-    PRTSTR("Kernel privilege confirmed.");
-    PRTSTR("Scanning kernel function table...");
-    // get kernel functions
+    PRTSTR("Scanning kernel functions");
     scanKernelFunctions(k_tbl);
-    PRTSTR("Kernel function scan complete.");
+    PRTSTR("PSPHEN: Kernel function scan complete");
 
-    // repair damage done by kernel exploit
-    PRTSTR("Restoring modified kernel instructions...");
+    PRTSTR("Repairing kernel");
     kxf->repairInstruction(k_tbl);
-    PRTSTR("Kernel repair complete.");
+    PRTSTR("PSPHEN: Kernel exploit cleanup complete");
 
     if (ark_config->exec_mode == DEV_UNK){
         PRTSTR("Autodetecting device");
-        if (autoDetectDevice(ark_config) < 0){ // attempt to autodetect configuration
+        if (autoDetectDevice(ark_config) < 0){
             PRTSTR("Could not detect device, aborting...");
             return;
         }
     }
 
-    // Output Exploit Reach Screen
+    PRTSTR("PSPHEN: Kernel setup complete");
+    /* Show the PS3-style activation toast only after kernel privileges and
+       HEN setup have succeeded. It remains visible for 5 seconds, fading
+       during the final second, before normal initialization continues. */
+    showPspHenAchievement(g_tbl->KernelDelayThread);
     running_ark[20] = 'P';
     if (IS_PSP(ark_config)){
-        running_ark[17] = ' '; // show 'PSP'
+        running_ark[17] = ' ';
     }
     else{
         if (IS_VITA_ADR(ark_config)){
-            running_ark[17] = 'v'; // show 'vPSP'
+            running_ark[17] = 'v';
         }
         else{
-            running_ark[17] = 'e'; // show 'ePSP'
+            running_ark[17] = 'e';
             if (IS_VITA_POPS(ark_config)){
-                running_ark[20] = 'X'; // show 'ePSX'
+                running_ark[20] = 'X';
             }
         }
     }
     PRTSTR(running_ark);
+    PRTSTR("PSPHEN: Starting ARK initialization");
 
-    PRTSTR("Starting ARK HEN components...");
     loadKernelArk();
 }
 
 // Clear BSS Segment of Payload
 void clearBSS(void){
-    // BSS Start and End Address from Linkfile
     extern char __bss_start, __bss_end;
-    
-    // Clear Memory
     memset(&__bss_start, 0, &__bss_end - &__bss_start);
 }
 
 u32 sctrlHENFindFunction(char* mod, char* lib, u32 nid){
     return FindFunction(mod, lib, nid);
 }
-

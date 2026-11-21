@@ -33,6 +33,7 @@ typedef u32 Color;
 extern void printTextScreen(int x, int y, const char * text, u32 color);
 
 void print_to_screen(const char * text);
+void showPspHenAchievement(void (*delayThread)(unsigned int));
 extern void print_to_screen_color(const char * text, u32 color);
 void PRTSTR11(const char* A, unsigned long B, unsigned long C, unsigned long D, unsigned long E, unsigned long F, unsigned long G, unsigned long H, unsigned long I, unsigned long J, unsigned long K, unsigned long L);
 #define PRTSTR10(text, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10) PRTSTR11(text, x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, 0)
