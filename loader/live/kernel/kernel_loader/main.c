@@ -70,24 +70,35 @@ int exploitEntry(ARKConfig* arg0, UserFunctions* arg1, char* kxploit_file){
     initScreen(g_tbl->DisplaySetFrameBuf);
 
     PRTSTR("Loading PSP HEN");
+    PRTSTR("Initializing exploit environment...");
+    PRTSTR("Resolving system function table...");
+    PRTSTR("Checking available memory...");
     
     g_tbl->freeMem(g_tbl);
+    PRTSTR("Memory preparation complete.");
     
     // read kxploit file into memory and initialize it
     char* err = NULL;
     int res = 0;
-    PRTSTR("Reading kxploit file...");
+    PRTSTR("Reading kernel exploit payload...");
     if ((res=initKxploitFile(kxploit_file)) == 0){
-        PRTSTR("Scanning stubs for kxploit...");
+        PRTSTR("Kernel exploit payload loaded.");
+        PRTSTR("Resolving required kernel stubs...");
+        PRTSTR("Scanning system imports for exploit...");
         if ((res=kxf->stubScanner(g_tbl)) == 0){
+            PRTSTR("Required kernel stubs resolved.");
+            PRTSTR("Preparing kernel exploit trigger...");
             // Corrupt Kernel
-            PRTSTR("Doing kernel exploit...");
+            PRTSTR("Executing kernel exploit...");
             if ((res=kxf->doExploit()) == 0){
+                PRTSTR("Kernel exploit trigger completed.");
+                PRTSTR("Preparing privilege escalation...");
                 // Output Loading Screen
-                PRTSTR("Escalating privilages...");
+                PRTSTR("Escalating privileges...");
                 // Flush Cache
                 g_tbl->KernelDcacheWritebackAll();
                 // Trigger Kernel Permission Callback
+                PRTSTR("Invoking kernel-side loader...");
                 kxf->executeKernel(KERNELIFY(&kernelContentFunction));
                 err = "Could not execute kernel function";
                 res = -1;
@@ -158,13 +169,22 @@ int initKxploitFile(char* kxploit_file){
         if (fd<0) return -1;
         kxploit_file = k_path;
     }
-    PRTSTR1("Loading Kxploit at %s", kxploit_file);
+    PRTSTR1("Opening exploit payload: %s", kxploit_file);
+    PRTSTR("Clearing exploit payload memory...");
     kbin_path = kxploit_file;
     memset((void *)KXPLOIT_LOADADDR, 0, 0x4000);
-    g_tbl->IoRead(fd, (void *)KXPLOIT_LOADADDR, 0x4000);
+    int bytes_read = g_tbl->IoRead(fd, (void *)KXPLOIT_LOADADDR, 0x4000);
     g_tbl->IoClose(fd);
+    if (bytes_read <= 0){
+        PRTSTR("ERROR: Exploit payload is empty or unreadable.");
+        return -1;
+    }
+    PRTSTR1("Payload read: %d bytes", bytes_read);
+    PRTSTR("Flushing payload instruction cache...");
     g_tbl->KernelDcacheWritebackAll();
+    PRTSTR("Initializing exploit entry point...");
     kEntryPoint(kxf);
+    PRTSTR("Exploit entry point initialized.");
     return 0;
 }
 
@@ -190,13 +210,16 @@ void kernelContentFunction(void){
     g_tbl->prtstr = KERNELIFY(g_tbl->prtstr);
     kxf->repairInstruction = KERNELIFY(kxf->repairInstruction);
 
-    PRTSTR("Scanning kernel functions");
+    PRTSTR("Kernel privilege confirmed.");
+    PRTSTR("Scanning kernel function table...");
     // get kernel functions
     scanKernelFunctions(k_tbl);
+    PRTSTR("Kernel function scan complete.");
 
     // repair damage done by kernel exploit
-    PRTSTR("Repairing kernel");
+    PRTSTR("Restoring modified kernel instructions...");
     kxf->repairInstruction(k_tbl);
+    PRTSTR("Kernel repair complete.");
 
     if (ark_config->exec_mode == DEV_UNK){
         PRTSTR("Autodetecting device");
@@ -224,6 +247,7 @@ void kernelContentFunction(void){
     }
     PRTSTR(running_ark);
 
+    PRTSTR("Starting ARK HEN components...");
     loadKernelArk();
 }
 
