@@ -84,34 +84,46 @@ void printTextScreen(int x, int y, const char * text, u32 color)
 }
 
 /*
- * Scroll the execution console instead of clearing it when it reaches the
- * bottom of the display. Earlier exploit messages remain visible.
+ * Scroll the active PSP framebuffer up by one text row.  Copy complete
+ * framebuffer rows (including the unused stride pixels) so the display
+ * contents and the text cursor stay in sync.
  */
+#define CONSOLE_LINE_HEIGHT 12
+#define CONSOLE_GLYPH_HEIGHT 8
+
 static void scrollConsole(void)
 {
-    const int scrollLines = 12;
-    const unsigned int visibleWords = PSP_LINE_SIZE * (SCREEN_HEIGHT - scrollLines);
+    int y;
+    const int rowsToMove = SCREEN_HEIGHT - CONSOLE_LINE_HEIGHT;
 
-    memmove(g_vram_base,
-            g_vram_base + (PSP_LINE_SIZE * scrollLines),
-            visibleWords * sizeof(u32));
-    memset(g_vram_base + visibleWords, 0,
-           PSP_LINE_SIZE * scrollLines * sizeof(u32));
-    gY -= scrollLines;
+    /* Move rows upward in-place.  Destination is always below source. */
+    for (y = 0; y < rowsToMove; ++y)
+    {
+        u32 *dst = g_vram_base + (y * PSP_LINE_SIZE);
+        const u32 *src = g_vram_base + ((y + CONSOLE_LINE_HEIGHT) * PSP_LINE_SIZE);
+        memcpy(dst, src, PSP_LINE_SIZE * sizeof(u32));
+    }
+
+    /* Clear only the newly exposed rows at the bottom of the display. */
+    memset(g_vram_base + (rowsToMove * PSP_LINE_SIZE), 0,
+           CONSOLE_LINE_HEIGHT * PSP_LINE_SIZE * sizeof(u32));
+
+    /* The next message belongs on the final available text row. */
+    gY = SCREEN_HEIGHT - CONSOLE_GLYPH_HEIGHT;
 }
 
 void print_to_screen_color(const char * text, u32 color)
 {
-    /* Each console row advances 12 pixels; glyphs are 8 pixels tall. */
-    if (gY + 8 > SCREEN_HEIGHT)
-    {
+    if (text == NULL) return;
+
+    /* Scroll before drawing whenever the next glyph would leave the screen. */
+    if (gY < 0) gY = 0;
+    if (gY + CONSOLE_GLYPH_HEIGHT > SCREEN_HEIGHT)
         scrollConsole();
-    }
 
     printTextScreen(0, gY, text, color);
-    gY += 12;
+    gY += CONSOLE_LINE_HEIGHT;
 }
-
 
 unsigned int gPrintColor = 0xFFFFFFFF;
 
