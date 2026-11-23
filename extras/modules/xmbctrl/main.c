@@ -37,6 +37,7 @@
 #include "list.h"
 #include "settings.h"
 #include "plugins.h"
+#include "include/umddump.h"
 
 PSP_MODULE_INFO("PSPHENXmbControl", 0x0007, 1, 5);
 
@@ -65,6 +66,7 @@ GetItem GetItemes[] =
     { 2, 0, "FPS Counter" },
     { 4, 0, "FPS Counter Position" },
     { 2, 0, "Crash Dump" },
+    { 5, 0, "UMD Dumper" },
 };
 
 #define PLUGINS_CONTEXT 1
@@ -130,6 +132,11 @@ char* ark_fpspos_options[] = {
     "Bottom Left", "Bottom Right", "Bottom Middle"
 };
 
+// Third entry is a live status line, see umddump.c
+char* ark_umddump_options[] = {
+    "Idle", "Start Dump", umddump_status
+};
+
 struct {
     int n;
     char** c;
@@ -139,6 +146,7 @@ struct {
     {2, ark_settings_boolean}, // QA Flags
     {NELEMS(ark_vshregion_options), ark_vshregion_options}, // VSH Region
     {NELEMS(ark_fpspos_options), ark_fpspos_options}, // FPS Counter Position
+    {NELEMS(ark_umddump_options), ark_umddump_options}, // UMD Dumper
 };
 
 #define N_ITEMS (sizeof(GetItemes) / sizeof(GetItem))
@@ -782,6 +790,7 @@ int vshGetRegistryValuePatched(u32 *option, char *name, void *arg2, int size, in
                 config.fpscounter,
                 config.fpscounterpos,
                 config.crashdump,
+                umddump_get_value(),
             };
             
             int i;
@@ -819,6 +828,7 @@ int vshSetRegistryValuePatched(u32 *option, char *name, int size, int *value)
     {
         if(is_cfw_config == 1)
         {
+            static int umddump_dummy = 0;
             static int *configs[] =
             {
                 &config.qaflags,
@@ -826,6 +836,7 @@ int vshSetRegistryValuePatched(u32 *option, char *name, int size, int *value)
                 &config.fpscounter,
                 &config.fpscounterpos,
                 &config.crashdump,
+                &umddump_dummy,
             };
             
             int i;
@@ -833,6 +844,11 @@ int vshSetRegistryValuePatched(u32 *option, char *name, int size, int *value)
             {
                 if(sce_paf_private_strcmp(name, GetItemes[i].item) == 0)
                 {
+                    if (configs[i] == &umddump_dummy){
+                        // action item: choosing "Start Dump" begins the dump, nothing is saved
+                        if (*value == 1) umddump_start();
+                        return 0;
+                    }
                     *configs[i] = GetItemes[i].negative ? !(*value) : *value;
                     saveSettings();
                     if (configs[i] == &config.fpscounter || configs[i] == &config.fpscounterpos || configs[i] == &config.crashdump){

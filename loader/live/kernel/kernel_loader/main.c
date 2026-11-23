@@ -37,6 +37,24 @@ int autoDetectDevice(ARKConfig* config);
 int initKxploitFile(char*);
 void kernelContentFunction(void);
 
+// Load K.BIN into memory and let it fill in the kxploit function table
+int initKxploitFile(char* kxploit_file){
+    if (kxploit_file == NULL) return -1;
+    kbin_path = kxploit_file;
+
+    int fd = g_tbl->IoOpen(kxploit_file, PSP_O_RDONLY, 0777);
+    if (fd < 0) return fd;
+
+    g_tbl->IoRead(fd, (void*)kEntryPoint, 0x4000);
+    g_tbl->IoClose(fd);
+    g_tbl->KernelDcacheWritebackAll();
+    g_tbl->KernelIcacheInvalidateAll();
+
+    // K.BIN's entry point (initKxploit) registers the exploit callbacks in kxf
+    ((void (*)(KxploitFunctions*))kEntryPoint)(kxf);
+    return 0;
+}
+
 // Entry Point
 int exploitEntry(ARKConfig* arg0, UserFunctions* arg1, char* kxploit_file) __attribute__((section(".text.startup")));
 int exploitEntry(ARKConfig* arg0, UserFunctions* arg1, char* kxploit_file){

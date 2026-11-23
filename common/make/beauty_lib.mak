@@ -8,7 +8,7 @@ CFLAGS := $(addprefix -I,$(INCDIR)) $(CFLAGS)
 	@$(cmd_cc_o_c)
 
 quiet_cmd_ar = AR $@
-cmd_ar = psp-ar q $(TARGET_LIB) $(OBJS)
+cmd_ar = rm -f $(TARGET_LIB) && psp-ar q $(TARGET_LIB) $(OBJS)
 
 quiet_cmd_ranlib = RANLIB $@
 cmd_ranlib = psp-ranlib $(TARGET_LIB)
