@@ -180,13 +180,23 @@ void onVitaFlashLoaded(){
 
 void loadKernelArk(){
 
-     // Install flash0 files
+    /* Do not continue into kernel patching if the exploit function table or
+       configuration was not initialized correctly. */
+    if (k_tbl == NULL || ark_config == NULL){
+        PRTSTR("PSPHEN ERROR: kernel loader is not initialized");
+        return;
+    }
+
+    // Install flash0 files
     PRTSTR("Installing "FLASH0_ARK);
     flashPatch();
-    
+    PRTSTR("PSPHEN: FLASH0 installation stage returned");
+
     // Invalidate Cache
-    k_tbl->KernelDcacheWritebackInvalidateAll();
-    k_tbl->KernelIcacheInvalidateAll();
+    if (k_tbl->KernelDcacheWritebackInvalidateAll)
+        k_tbl->KernelDcacheWritebackInvalidateAll();
+    if (k_tbl->KernelIcacheInvalidateAll)
+        k_tbl->KernelIcacheInvalidateAll();
 
     // check for recovery flag (R1 button)
     int (*CtrlPeekBufferPositive)(SceCtrlData *, int) = (void *)FindFunction("sceController_Service", "sceCtrl", 0x3A622550);
@@ -201,17 +211,35 @@ void loadKernelArk(){
 
     PRTSTR("Preparing reboot.");
 
-    // Find LoadExec Module
+    // Find LoadExec Module. A missing module must not be dereferenced.
     SceModule2 * loadexec = k_tbl->KernelFindModuleByName("sceLoadExec");
-    
+    if (loadexec == NULL || loadexec->text_addr == 0 || loadexec->text_size == 0){
+        PRTSTR("PSPHEN ERROR: sceLoadExec module not found or invalid");
+        return;
+    }
+
+    // Find the kernel thread-manager function required by the PSP patch.
+    u32 getUserLevel = 0;
+    if (!IS_VITA_ADR(ark_config)){
+        getUserLevel = FindFunction("sceThreadManager", "ThreadManForKernel", 0xF6427665);
+        if (getUserLevel == 0){
+            PRTSTR("PSPHEN ERROR: GetUserLevel function not found");
+            return;
+        }
+    }
+
     // Find Reboot Loader Function
-    _LoadReboot = (void *)loadexec->text_addr;    
-    
+    _LoadReboot = (void *)loadexec->text_addr;
+
     setupRebootBuffer();
-    
+    if (rebootbuffer == NULL || size_rebootbuffer == 0){
+        PRTSTR("PSPHEN ERROR: reboot payload is unavailable");
+        return;
+    }
+
     // make the common loadexec patches
     if (IS_VITA_ADR(ark_config)) patchAdrenalineReboot(loadexec);
-    else patchLoadExec(loadexec, (u32)LoadReboot, (u32)FindFunction("sceThreadManager", "ThreadManForKernel", 0xF6427665), 3);
+    else patchLoadExec(loadexec, (u32)LoadReboot, getUserLevel, 3);
     
     // Invalidate Cache
     k_tbl->KernelDcacheWritebackInvalidateAll();
@@ -240,6 +268,10 @@ void loadKernelArk(){
         PRTSTR1("Running Menu at %s", menupath);
         int (* _KernelLoadExecVSHWithApitype)(int, char *, struct SceKernelLoadExecVSHParam *, int);
         _KernelLoadExecVSHWithApitype = (void *)findFirstJALForFunction("sceLoadExec", "LoadExecForKernel", 0xD8320A28);
+        if (_KernelLoadExecVSHWithApitype == NULL){
+            PRTSTR("PSPHEN ERROR: VSH launcher function not found");
+            return;
+        }
         _KernelLoadExecVSHWithApitype(0x141, menupath, &param, 0x10000);
     }
     else {
@@ -247,7 +279,11 @@ void loadKernelArk(){
         PRTSTR("Running VSH");
         extern int iso_mode;
         iso_mode = MODE_UMD;
-        int (*_KernelExitVSH)(void*) = FindFunction("sceLoadExec", "LoadExecForKernel", 0x08F7166C);
+        int (*_KernelExitVSH)(void*) = (void *)FindFunction("sceLoadExec", "LoadExecForKernel", 0x08F7166C);
+        if (_KernelExitVSH == NULL){
+            PRTSTR("PSPHEN ERROR: KernelExitVSH function not found");
+            return;
+        }
         _KernelExitVSH(NULL);
     }
 }
