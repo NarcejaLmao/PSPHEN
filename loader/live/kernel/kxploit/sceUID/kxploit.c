@@ -143,20 +143,38 @@ int doExploit(void) {
         PRTSTR("PSP 6.60+");
       }
       else {
-        PRTSTR("Vita 3.60");
-        libc_clock_offset = LIBC_CLOCK_OFFSET_360; // adjust offset
+        /* An unknown signature must not fall through to the Vita 3.60
+         * address: on PSP this can overwrite an unrelated kernel pointer. */
+        PRTSTR("Unsupported kernel layout; exploit cancelled");
+        return -0x6601;
+      }
+    }
+    else {
+      PRTSTR("Exploit stub unavailable; exploit cancelled");
+      return -0x6602;
+    }
+
+    // Allocate dummy blocks to improve reliability and validate each result.
+    char dummy[32];
+    SceUID dummyids[10];
+    memset(dummy, 'a', sizeof(dummy));
+    for (int i=0; i<10; i++) {
+      dummyids[i] = g_tbl->KernelAllocPartitionMemory(PSP_MEMORY_PARTITION_USER, dummy, PSP_SMEM_High, 0x10, NULL);
+      if (dummyids[i] < 0) {
+        while (--i >= 0) g_tbl->KernelFreePartitionMemory(dummyids[i]);
+        PRTSTR("Could not allocate exploit memory; cancelled");
+        return -0x6603;
       }
     }
 
-    // Allocate dummy blocks to improve reliability
-    char dummy[32];
-    memset(dummy, 'a', sizeof(dummy));
-    SceUID dummyid;
-    for (int i=0; i<10; i++) // a few iterations seem to improve stability
-      dummyid = g_tbl->KernelAllocPartitionMemory(PSP_MEMORY_PARTITION_USER, dummy, PSP_SMEM_High, 0x10, NULL);
-
-    // we can use whatever memory allocated by dummy block to inject some code, thus not needing to rely on hardcoded pointers
-    jump_ptr = g_tbl->KernelGetBlockHeadAddr(dummyid) + 4;
+    SceUID dummyid = dummyids[9];
+    void* dummyhead = g_tbl->KernelGetBlockHeadAddr(dummyid);
+    if (dummyhead == NULL) {
+      for (int i=0; i<10; i++) g_tbl->KernelFreePartitionMemory(dummyids[i]);
+      PRTSTR("Could not locate exploit memory; cancelled");
+      return -0x6604;
+    }
+    jump_ptr = (u32)dummyhead + 4;
 
     // we can calculate the address of dummy block via its UID and from there calculate where the next block will be
     u32 dummyaddr = 0x88000000 + ((dummyid >> 5) & ~3);
@@ -173,12 +191,22 @@ int doExploit(void) {
     // Plant UID data structure into kernel as string
     u32 string[] = { libc_clock_offset - 4, KERNELIFY(jump_ptr), type_uid, encrypted_uid, uid_name, 0x1010070A, t1, t2, 0};
     SceUID plantid = g_tbl->KernelAllocPartitionMemory(PSP_MEMORY_PARTITION_USER, (char *)string, PSP_SMEM_High, 0x10, NULL);
+    if (plantid < 0) {
+      for (int i=0; i<10; i++) g_tbl->KernelFreePartitionMemory(dummyids[i]);
+      PRTSTR("Could not plant exploit UID; cancelled");
+      return -0x6605;
+    }
 
     g_tbl->KernelDcacheWritebackAll();
 
-    // check that the fake UID block has been planted where we expect
+    // Verify the fake UID before touching the libc clock function pointer.
     u32 test = readKram(newaddr+8);
-    if (test != type_uid) return 0xDEADBEEF;
+    if (test != type_uid) {
+      g_tbl->KernelFreePartitionMemory(plantid);
+      for (int i=0; i<10; i++) g_tbl->KernelFreePartitionMemory(dummyids[i]);
+      PRTSTR("Exploit memory verification failed; cancelled");
+      return -0x6606;
+    }
 
     // backup data so we can restore later
     patch_addr = libc_clock_offset;
